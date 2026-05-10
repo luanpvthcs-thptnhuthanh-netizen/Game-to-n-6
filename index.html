@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline'; font-src * data: blob: 'unsafe-inline';">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#2563eb">
+<style>
+:root{
+  --bg-1:#f8fbff; --bg-2:#eef7ff; --surface:#ffffff; --surface-2:#f8fbff;
+  --text-1:#16324f; --text-2:#49627d; --line:#dbe7f3; --line-strong:#bfd4e7;
+  --shadow:0 18px 50px rgba(38,70,108,.12); --shadow-soft:0 8px 24px rgba(38,70,108,.08);
+  --primary:#2563eb; --primary-2:#1d4ed8; --accent:#0ea5e9; --success:#16a34a;
+  --warning:#f59e0b; --danger:#ef4444; --base-size:32px; --opt-size:28px; --badge-size:50px;
+  --math-scale:112%; --radius-xl:24px; --radius-lg:18px; --radius-md:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  background:radial-gradient(circle at top left,#ffffff 0%,#f6fbff 32%,transparent 55%),linear-gradient(180deg,var(--bg-1) 0%,var(--bg-2) 100%);
+  color:var(--text-1); min-height:100dvh; overflow-x:hidden; overflow-y:auto;
+}
+body.before-start .exam-shell, body.before-start .nav-arrow, body.before-start #floatingSubmitBtn{display:none!important}
+body.before-submit .btn-reveal, body.before-submit .btn-explain, body.before-submit .btn-check{display:none!important}
+body.after-submit .btn-reveal, body.after-submit .btn-explain{display:flex!important}
+.start-screen{
+  min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px;
+}
+.start-card{
+  width:min(96%,760px); background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%); border:1px solid rgba(191,212,231,.85);
+  border-radius:28px; box-shadow:var(--shadow); padding:34px 30px; position:relative; overflow:hidden;
+}
+.start-card::before{content:""; position:absolute; inset:0 0 auto 0; height:7px; background:linear-gradient(90deg,var(--primary),var(--accent),#22c55e)}
+.start-title{font-size:42px; font-weight:900; text-align:center; margin:6px 0 10px; color:#16324f}
+.start-subtitle{font-size:19px; color:var(--text-2); text-align:center; margin-bottom:24px}
+.start-group{display:flex; flex-direction:column; gap:10px; margin-bottom:20px}
+.start-label{font-size:18px; font-weight:700}
+.start-input{
+  width:100%; padding:18px 20px; border-radius:18px; border:2px solid #cdddeb; outline:none;
+  font-size:24px; font-weight:700; color:var(--text-1); background:#fff; box-shadow:var(--shadow-soft)
+}
+.start-input:focus{border-color:#93c5fd; box-shadow:0 0 0 5px rgba(59,130,246,.12)}
+.start-actions{display:flex; justify-content:center; margin-top:16px}
+.start-btn{
+  min-width:220px; border:none; border-radius:18px; padding:16px 26px; cursor:pointer; color:#fff;
+  background:linear-gradient(135deg,#2563eb 0%,#0ea5e9 100%); font-size:24px; font-weight:900; box-shadow:0 14px 26px rgba(37,99,235,.22)
+}
+.start-btn:hover{transform:translateY(-2px)}
+.start-btn.secondary{background:linear-gradient(135deg,#64748b 0%,#334155 100%)}
+.start-btn.secondary:hover{transform:translateY(-2px)}
+.start-actions.column{flex-direction:column; gap:12px; align-items:center}
+.start-note{margin-top:18px; text-align:center; color:var(--text-2); font-size:15px}
+.exam-topbar{
+  width:min(95%,1480px); margin:10px auto 0; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.exam-user-badge,.exam-progress-badge{
+  background:#fff; border:1px solid var(--line-strong); border-radius:999px; padding:10px 18px; box-shadow:var(--shadow-soft); font-weight:800;
+}
+.exam-shell{display:flex; flex-direction:column; align-items:center; min-height:100dvh}
+.slide-container{
+  width:min(95%,1480px); height:calc(100dvh - 90px); margin:9px auto 18px; background:linear-gradient(180deg,#ffffff 0%, #fbfdff 100%);
+  border:1px solid rgba(191,212,231,.85); border-radius:var(--radius-xl); box-shadow:var(--shadow);
+  padding:22px 28px 20px; display:none; flex-direction:column; position:relative; overflow:hidden;
+}
+.slide-container::before{content:""; position:absolute; inset:0 0 auto 0; height:6px; background:linear-gradient(90deg,var(--primary),var(--accent),#22c55e)}
+.slide-container.active{display:flex; animation:slideIn .28s ease-out}
+.q-header{display:flex; justify-content:space-between; align-items:center; gap:16px; padding-bottom:14px; margin-bottom:14px; border-bottom:1px solid var(--line)}
+.header-left,.header-right{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.part-badge{background:linear-gradient(135deg,var(--primary) 0%, var(--accent) 100%); color:#fff; padding:11px 22px; border-radius:999px; font-size:19px; font-weight:800; text-transform:uppercase; box-shadow:0 10px 20px rgba(37,99,235,.24)}
+.zoom-btn,.timer,.btn-exit-html,.slide-counter,.btn-action,.btn-option,.btn-tf,input.answer-input,#floatingSubmitBtn{transition:all .2s ease}
+.zoom-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line-strong);background:#fff;color:var(--text-1);font-size:22px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft)}
+.zoom-btn:hover{transform:translateY(-1px);background:#f6fbff;border-color:#9fc1df}
+.timer{font-size:22px;color:var(--text-1);font-weight:800;background:linear-gradient(180deg,#ffffff 0%, #f4f9ff 100%);padding:10px 22px;border-radius:999px;cursor:pointer;border:1px solid var(--line-strong);box-shadow:var(--shadow-soft);display:flex;align-items:center;gap:8px;min-width:190px;justify-content:center}
+.timer.running{color:#b91c1c;background:linear-gradient(180deg,#fff4f4 0%, #fee2e2 100%);border-color:#fca5a5;animation:pulse 1s infinite}
+.btn-exit-html{background:linear-gradient(135deg,#fb7185 0%, var(--danger) 100%);color:#fff;border:none;padding:10px 22px;border-radius:999px;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 12px 24px rgba(239,68,68,.22)}
+.content-wrapper{flex-grow:1;overflow-y:auto;padding-right:10px;padding-bottom:20px;display:flex;flex-direction:column}
+.content-wrapper::-webkit-scrollbar{width:10px}
+.content-wrapper::-webkit-scrollbar-thumb{background:#cfe0ef;border-radius:999px;border:2px solid #f6fbff}
+.question-content{font-size:var(--base-size);font-weight:600;color:var(--text-1);margin-bottom:12px;line-height:1.55;text-align:justify}
+.q-label{display:inline-flex;align-items:center;justify-content:center;min-width:86px;padding:6px 14px;margin-right:10px;border-radius:999px;color:#fff;background:linear-gradient(135deg,#f59e0b 0%, #f97316 100%);font-weight:900;box-shadow:0 8px 18px rgba(249,115,22,.24)}
+mjx-container{font-size:var(--math-scale)!important;margin:0 3px!important}
+.img-container{text-align:center;margin:8px 0 14px;width:100%;padding:10px 0}
+.real-image{display:inline-block;max-width:92%;height:auto;max-height:410px;border-radius:18px;border:1px solid #cfe0ef;background:#fff;box-shadow:var(--shadow-soft);padding:6px;cursor:zoom-in}
+.options-stack{display:flex;flex-direction:column;gap:12px;width:100%}
+.options-stack .btn-option{width:100%;display:flex;align-items:flex-start}
+.options-stack .opt-text{flex:1}
+.btn-option{background:linear-gradient(180deg,#ffffff 0%, #f9fcff 100%);border:1px solid var(--line-strong);padding:16px 16px;font-size:var(--opt-size);border-radius:18px;cursor:pointer;text-align:left;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-soft)}
+.btn-option:hover{transform:translateY(-2px);border-color:#9fc1df;background:#ffffff}
+.opt-badge{width:var(--badge-size);height:var(--badge-size);background:linear-gradient(135deg,var(--success) 0%, #22c55e 100%);color:#fff;border-radius:14px;display:flex;justify-content:center;align-items:center;font-weight:900;flex-shrink:0;box-shadow:0 10px 18px rgba(34,197,94,.18)}
+.btn-option.selected-answer{border-color:#60a5fa!important;background:linear-gradient(180deg,#eff6ff 0%, #dbeafe 100%)!important}
+.btn-option.correct{border-color:#86efac!important;background:linear-gradient(180deg,#f0fdf4 0%, #dcfce7 100%)!important}
+.btn-option.wrong{border-color:#fca5a5!important;background:linear-gradient(180deg,#fff5f5 0%, #fee2e2 100%)!important}
+.tf-container{display:flex;flex-direction:column;gap:14px;margin:8px 0 22px}
+.tf-row{display:flex;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(180deg,#ffffff 0%, #f9fcff 100%);padding:16px 18px;border-radius:18px;border:1px solid #dbe7f3;box-shadow:var(--shadow-soft)}
+.tf-content{font-size:var(--opt-size);font-weight:600;color:var(--text-1);flex-grow:1}
+.tf-buttons{display:flex;gap:12px;min-width:180px}
+.btn-tf{border:1px solid var(--line-strong);background:linear-gradient(180deg,#ffffff 0%, #f4f9ff 100%);padding:11px 0;border-radius:12px;font-weight:900;cursor:pointer;flex:1;color:var(--text-2);text-align:center;font-size:22px;box-shadow:var(--shadow-soft)}
+.btn-tf.selected-answer{border-color:#60a5fa!important;background:#dbeafe!important;color:#1d4ed8!important}
+.btn-tf.user-correct{background:linear-gradient(135deg,#22c55e 0%, #16a34a 100%)!important;color:#fff!important;border-color:#16a34a!important}
+.btn-tf.user-wrong{background:linear-gradient(135deg,#f87171 0%, #ef4444 100%)!important;color:#fff!important;border-color:#dc2626!important}
+.btn-tf.reveal-true{border:2px solid #22c55e!important;color:#166534!important;background:#ecfdf5!important}
+.btn-tf.reveal-false{border:2px solid #ef4444!important;color:#b91c1c!important;background:#fef2f2!important}
+.short-answer-area{display:flex;flex-direction:column;align-items:center;margin:6px 0 28px;width:100%}
+.input-group{position:relative;width:min(74%, 820px)}
+input.answer-input{width:100%;padding:18px 24px;font-size:30px;border:2px solid #cdddeb;border-radius:18px;outline:none;text-align:center;font-weight:800;color:var(--text-1);background:linear-gradient(180deg,#ffffff 0%, #f8fbff 100%);box-shadow:var(--shadow-soft)}
+input.answer-input:focus{border-color:#93c5fd;background:#fff;box-shadow:0 0 0 5px rgba(59,130,246,.12)}
+.explanation-box{display:none;margin-top:18px;padding:22px 24px;background:linear-gradient(180deg,#f4fbff 0%, #e9f7ff 100%);border:1px solid #bae6fd;border-left:8px solid var(--accent);border-radius:18px;animation:fadeIn .35s;box-shadow:var(--shadow-soft)}
+.explanation-title{font-weight:900;color:#0369a1;margin-bottom:10px;font-size:26px;display:flex;align-items:center;gap:10px}
+.explanation-content{font-size:var(--opt-size);color:var(--text-1);line-height:1.65}
+.actions-area{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
+.btn-action{color:#fff;border:none;padding:12px 22px;font-size:18px;font-weight:800;border-radius:14px;cursor:pointer;min-width:170px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 12px 22px rgba(15,23,42,.12)}
+.btn-reveal{background:linear-gradient(135deg,#f59e0b 0%, #f97316 100%)}
+.btn-check{background:linear-gradient(135deg,#3b82f6 0%, var(--primary-2) 100%)}
+.btn-explain{background:linear-gradient(135deg,#10b981 0%, #059669 100%)}
+.slide-counter{font-size:18px;font-weight:900;color:var(--text-1);background:linear-gradient(180deg,#ffffff 0%, #edf6ff 100%);padding:10px 22px;border-radius:999px;border:1px solid #d7e6f3;box-shadow:var(--shadow-soft)}
+.nav-arrow{position:fixed;top:50%;transform:translateY(-50%);width:58px;height:74px;background:rgba(37,99,235,.16);color:#fff;font-size:34px;border:none;border-radius:18px;cursor:pointer;transition:.25s;z-index:100;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(10px);box-shadow:0 12px 28px rgba(37,99,235,.18)}
+.nav-arrow:hover{background:rgba(37,99,235,.9);transform:translateY(-50%) scale(1.04)}
+.nav-prev{left:10px}.nav-next{right:10px}
+#floatingSubmitBtn{position:fixed;right:18px;bottom:18px;z-index:150;background:linear-gradient(135deg,#16a34a 0%,#22c55e 100%);color:#fff;border:none;border-radius:999px;padding:16px 24px;font-size:20px;font-weight:900;box-shadow:0 18px 30px rgba(34,197,94,.24);cursor:pointer}
+#floatingSubmitBtn:hover{transform:translateY(-2px)}
+.result-overlay{position:fixed; inset:0; background:rgba(15,23,42,.38); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; padding:18px; z-index:300}
+.result-overlay.show{display:flex}
+.result-card{width:min(96%,1200px); max-height:92dvh; overflow:auto; background:#fff; border-radius:28px; box-shadow:var(--shadow); border:1px solid var(--line-strong); padding:26px}
+.result-head{display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:16px}
+.result-title{font-size:34px; font-weight:900; color:#16324f}
+.result-summary{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:14px 0 18px}
+.summary-box{background:#f8fbff; border:1px solid #dbe7f3; border-radius:18px; padding:14px 16px; box-shadow:var(--shadow-soft)}
+.summary-box .k{font-size:14px; color:var(--text-2); margin-bottom:6px}.summary-box .v{font-size:28px; font-weight:900}
+.result-table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:18px; box-shadow:var(--shadow-soft)}
+.result-table th,.result-table td{border:1px solid #dbe7f3; padding:10px 12px; font-size:16px; vertical-align:top}
+.result-table th{background:#eff6ff; text-align:center}
+.result-table td:nth-child(1),.result-table td:nth-child(2),.result-table td:nth-child(5),.result-table td:nth-child(6){text-align:center}
+.badge-ok,.badge-no{display:inline-flex; align-items:center; justify-content:center; min-width:88px; padding:6px 10px; border-radius:999px; font-weight:800}
+.badge-ok{background:#dcfce7; color:#166534}.badge-no{background:#fee2e2; color:#b91c1c}
+.result-actions{display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap; margin-top:18px}
+.result-btn{border:none; border-radius:14px; padding:12px 18px; font-size:16px; font-weight:800; cursor:pointer}
+.result-btn.primary{background:#2563eb; color:#fff}.result-btn.gray{background:#e5eef8; color:#16324f}
+.ranking-overlay{position:fixed; inset:0; background:rgba(15,23,42,.38); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; padding:18px; z-index:310}
+.ranking-overlay.show{display:flex}
+.ranking-card{width:min(96%,1000px); max-height:92dvh; overflow:auto; background:#fff; border-radius:28px; box-shadow:var(--shadow); border:1px solid var(--line-strong); padding:26px}
+.ranking-head{display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:16px}
+.ranking-title{font-size:34px; font-weight:900; color:#16324f}
+.ranking-note{color:#49627d; font-size:15px; margin-top:6px}
+.ranking-empty{padding:26px; text-align:center; color:var(--text-2); font-size:18px; background:#f8fbff; border:1px dashed #bfd4e7; border-radius:18px}
+.rank-badge{display:inline-flex; align-items:center; justify-content:center; min-width:42px; height:42px; border-radius:50%; font-weight:900; color:#fff}
+.rank-1{background:linear-gradient(135deg,#f59e0b 0%,#f97316 100%)}
+.rank-2{background:linear-gradient(135deg,#94a3b8 0%,#64748b 100%)}
+.rank-3{background:linear-gradient(135deg,#b45309 0%,#92400e 100%)}
+.rank-other{background:linear-gradient(135deg,#60a5fa 0%,#2563eb 100%)}
+
+.feedback-popup{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%) scale(.75);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;z-index:9999;pointer-events:none;transition:all .35s cubic-bezier(.175,.885,.32,1.275);filter:drop-shadow(0 18px 30px rgba(15,23,42,.2));background:rgba(255,255,255,.96);padding:20px 44px;border-radius:28px;text-align:center;border:4px solid transparent;backdrop-filter:blur(8px)}
+.feedback-popup.correct{border-color:#4ade80;color:#15803d}.feedback-popup.wrong{border-color:#f87171;color:#b91c1c}.feedback-popup .emoji{font-size:92px;line-height:1;margin-bottom:10px}.feedback-popup .message{font-size:36px;font-weight:900;white-space:nowrap}
+.feedback-popup.pop{transform:translate(-50%,-50%) scale(1);opacity:1}
+@keyframes slideIn{from{opacity:0;transform:translateY(18px) scale(.995)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(248,113,113,.35)}70%{box-shadow:0 0 0 14px rgba(248,113,113,0)}100%{box-shadow:0 0 0 0 rgba(248,113,113,0)}}
+@media (max-width:1024px){:root{--base-size:26px;--opt-size:23px;--badge-size:44px;--math-scale:106%}}
+@media (max-width:768px){
+  :root{--base-size:20px;--opt-size:18px;--badge-size:36px;--math-scale:100%}
+  .start-title{font-size:30px}.start-btn{width:100%; font-size:20px}.start-actions.column{align-items:stretch}.start-input{font-size:20px}
+  .exam-topbar{width:100%; padding:0 12px}.slide-container{width:100%;height:calc(100dvh - 78px);padding:14px;border-radius:0;margin:0;border:none}
+  .q-header{flex-direction:column;align-items:stretch}.header-left,.header-right{justify-content:space-between;width:100%}
+  .part-badge{font-size:15px;padding:8px 14px}.btn-exit-html,.timer{font-size:15px;padding:8px 14px;min-width:118px}.zoom-btn{width:36px;height:36px;font-size:18px}
+  .tf-row{flex-direction:column;align-items:stretch}.tf-content{margin-bottom:8px}.tf-buttons{min-width:100%}.input-group{width:100%}
+  input.answer-input{font-size:24px;padding:15px}.nav-arrow{display:none}.actions-area{gap:10px}.btn-action{flex:1;min-width:130px;font-size:15px;padding:10px}.slide-counter{font-size:15px;width:100%;text-align:center;order:3;margin-top:4px}
+  #floatingSubmitBtn{left:12px; right:12px; bottom:12px; border-radius:18px}
+}
+</style>
+<script>
+MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']], processEscapes: true }, chtml: { scale: 1, matchFontHeight: false } };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style id="imath-options-stack-style">.options-stack{display:flex;flex-direction:column;gap:12px;width:100%;}.options-stack .btn-option{width:100%;display:flex;align-items:flex-start;}.options-stack .opt-text{flex:1;}</style></head>
+<body class="before-start before-submit">
+<div id="startScreen" class="start-screen">
+  <div class="start-card">
+    <div class="start-title">BÀI THI TRẮC NGHIỆM</div>
+    <div class="start-subtitle">Nhập họ và tên học sinh trước khi vào làm bài.</div>
+    <div class="start-group">
+      <label for="studentNameInput" class="start-label">Họ tên học sinh</label>
+      <input id="studentNameInput" class="start-input" type="text" placeholder="Ví dụ: Trần Văn A" autocomplete="name">
+    </div>
+    <div class="start-actions column">
+      <button class="start-btn" onclick="startExam()">VÀO THI</button>
+      <button class="start-btn secondary" onclick="openRankingBoard()">BẢNG XẾP HẠNG</button>
+    </div>
+    <div class="start-note">Họ tên sẽ được lưu lại trong trình duyệt để phục vụ thống kê kết quả.</div>
+  </div>
+</div>
+
+<audio id="bgMusic" preload="auto"></audio>
+
+<div class="exam-shell">
+  <div class="exam-topbar">
+    <div id="studentBadge" class="exam-user-badge">👤 Học sinh: Chưa nhập</div>
+    <div id="progressBadge" class="exam-progress-badge">📝 Tiến độ: 0/0 câu</div>
+  </div>
+
+  <button class="nav-arrow nav-prev" onclick="prevSlide()" title="Câu trước">❮</button>
+  <button class="nav-arrow nav-next" onclick="nextSlide()" title="Câu sau">❯</button>
+
+  <button id="floatingSubmitBtn" onclick="submitExam()">NỘP BÀI</button>
+
+  <div class="slide-container" id="slide-0"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 1:</span> Giá trị của ${x}$ để $ \dfrac{-15}{x} = \dfrac{-5}{-7} $ là:</div><div class="options-stack"><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">A</div> <div class="opt-text">${-21}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">${-16}$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">${-23}$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">${-20}$ .</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-0">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Giá trị của ${x}$ để  $ \dfrac{-15}{x} = \dfrac{-5}{-7} $ là:<br><br>A.  ${-21}$.	   B.  ${-16}$ .	    C. ${-23}$  .	     D. ${-20}$  .<br><br>Lời giải:<br> Chọn A <br>  Đáp số $x =-21$</div></div></div></div><div class="slide-container" id="slide-1"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 2:</span> Giá trị của ${x, y}$ để $\dfrac{-1}{8} = \dfrac{x}{40} = \dfrac{-2}{y} $ là:</div><div class="options-stack"><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">A</div> <div class="opt-text">$x =-5$; $y=16$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">$x =-5$; $y=40$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">$x =-2$; $y=16$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">$x =-2$; $y=40$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-1">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Giá trị của ${x, y}$ để $\dfrac{-1}{8} = \dfrac{x}{40} = \dfrac{-2}{y} $ là:<br><br>A.  $x =-5$; $y=16$.	   B. $x =-5$; $y=40$ .	    C. $x =-2$; $y=16$  .	     D. $x =-2$; $y=40$.<br><br>Lời giải:<br> Chọn A <br>  Đáp số $x =-5$ và $y=16$</div></div></div></div><div class="slide-container" id="slide-2"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 3:</span> Sắp xếp các phân số sau theo thứ tự tăng dần $\dfrac{2}{5}; \dfrac{11}{15}; \dfrac{9}{10}; \dfrac{16}{15}$</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">$\dfrac{11}{15}&lt; \dfrac{2}{5}&lt; \dfrac{9}{10}&lt; \dfrac{16}{15}$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">$\dfrac{9}{10}&lt; \dfrac{11}{15}&lt; \dfrac{2}{5}&lt; \dfrac{16}{15}$ .</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">C</div> <div class="opt-text">$\dfrac{2}{5}&lt; \dfrac{11}{15}&lt; \dfrac{9}{10}&lt; \dfrac{16}{15}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">$\dfrac{16}{15}&lt; \dfrac{11}{15}&lt; \dfrac{9}{10}&lt; \dfrac{2}{5}$ .</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-2">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Sắp xếp các phân số sau theo thứ tự tăng dần $\dfrac{2}{5}; \dfrac{11}{15}; \dfrac{9}{10}; \dfrac{16}{15}$<br><br>A. $\dfrac{11}{15}&lt; \dfrac{2}{5}&lt; \dfrac{9}{10}&lt; \dfrac{16}{15}$ .	   B. $\dfrac{9}{10}&lt; \dfrac{11}{15}&lt; \dfrac{2}{5}&lt; \dfrac{16}{15}$ .<br>    C.  $\dfrac{2}{5}&lt; \dfrac{11}{15}&lt; \dfrac{9}{10}&lt; \dfrac{16}{15}$.	     D. $\dfrac{16}{15}&lt; \dfrac{11}{15}&lt; \dfrac{9}{10}&lt; \dfrac{2}{5}$ .<br><br>Lời giải:<br> Chọn C <br>  $\dfrac{2}{5}&lt; \dfrac{11}{15}&lt; \dfrac{9}{10}&lt; \dfrac{16}{15}$</div></div></div></div><div class="slide-container" id="slide-3"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 4:</span> Tính $\dfrac{16}{15}+\dfrac{-8}{12}$ bằng.</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">$\dfrac{12}{5}$ .</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">B</div> <div class="opt-text">$\dfrac{2}{5}$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">$\dfrac{-3}{5}$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">$\dfrac{7}{5}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-3">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Tính $\dfrac{16}{15}+\dfrac{-8}{12}$ bằng. <br><br>A. $\dfrac{12}{5}$ .	   B. $\dfrac{2}{5}$ .<br>    C. $\dfrac{-3}{5}$ .	     D.  $\dfrac{7}{5}$.<br><br>Lời giải:<br> Chọn B <br> $\dfrac{16}{15} +\dfrac{-8}{12} = \dfrac{64}{60}+\dfrac{-40}{60}=\dfrac{24}{60}= \dfrac{2}{5}$</div></div></div></div><div class="slide-container" id="slide-4"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 5:</span> Tính $\dfrac{-7}{6} : \dfrac{-10}{7}$ bằng</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">$\dfrac{-11}{60}$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">$\dfrac{109}{60}$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">$\dfrac{169}{60}$ .</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">D</div> <div class="opt-text">$\dfrac{49}{60}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-4">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Tính $\dfrac{-7}{6} : \dfrac{-10}{7}$ bằng <br><br>A. $\dfrac{-11}{60}$ .	   B. $\dfrac{109}{60}$ .	    C. $\dfrac{169}{60}$ .	     D.   $\dfrac{49}{60}$.<br><br>Lời giải:<br> Chọn D <br> $\dfrac{-7}{6} : \dfrac{-10}{7} =\dfrac{-7}{6} \cdot \dfrac{7}{-10} = \dfrac{-49}{-60}= \dfrac{49}{60} $</div></div></div></div><div class="slide-container" id="slide-5"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 6:</span> Tính ${\frac{7}{15}}$ của ${-150}$</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${-68}$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">${-71}$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">${-69}$ .</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">D</div> <div class="opt-text">${-70}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-5">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Tính ${\frac{7}{15}}$ của ${-150}$ <br><br>A. ${-68}$ .	   B. ${-71}$ .	    C. ${-69}$ .	     D.   ${-70}$.<br><br>Lời giải:<br> Chọn D <br> $\frac{7}{15} \cdot \left( -150 \right)= {-70} $</div></div></div></div><div class="slide-container" id="slide-6"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 7:</span> Tìm một số biết ${\frac{5}{12}}$ của số đó bằng ${25}$</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${58}$ .</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">B</div> <div class="opt-text">${60}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">${62}$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">${57}$ .</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-6">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Tìm một số biết ${\frac{5}{12}}$ của số đó bằng ${25}$ <br><br>A. ${58}$ .	   B.   ${60}$.	    C. ${62}$ .	     D. ${57}$ .<br><br>Lời giải:<br> Chọn B <br> $25 : \frac{5}{12} = 60$</div></div></div></div><div class="slide-container" id="slide-7"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 8:</span> Tính tỉ số phần trăm (làm tròn đến hàng phần mười) của ${85}$ và ${41}$</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${207,34}\%$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">${207,33}\%$ .</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">C</div> <div class="opt-text">${207,32}\%$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">${207,31}\%$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-7">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Tính tỉ số phần trăm (làm tròn đến hàng phần mười) của ${85}$ và ${41}$<br><br>A. ${207,34}\%$ .	   B. ${207,33}\%$ .	    C.  ${207,32}\%$.	     D.  ${207,31}\%$.<br><br>Lời giải:<br> Chọn C <br> Tỉ số phần trăm của ${85}$ và ${41}$ là ${207,32}\%$</div></div></div></div><div class="slide-container" id="slide-8"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 9:</span> Tính ${30} \%$ của số ${810}$.</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${246} $ .</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">B</div> <div class="opt-text">${243} $.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">${242}$ .</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">${244}$ .</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-8">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Tính ${30} \%$ của số ${810}$.<br><br>A. ${246} $ .	   B.   ${243} $.	    C. ${242}$ .	     D. ${244}$ .<br><br>Lời giải:<br> Chọn B <br> ${30} \%$ của số ${810}$ là $810 \cdot \dfrac{30}{100}= 243$</div></div></div></div><div class="slide-container" id="slide-9"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 10:</span> Trong hình dưới, hãy chỉ ra tất cả các điểm nằm giữa hai điểm ${E}$ và ${Q}$.</div><div class="img-container"><img class="real-image" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA4gAAACMCAQAAACUwE/OAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAACYktHRAD/h4/MvwAAAAlwSFlzAAABLAAAASwAc4jpUgAAAAd0SU1FB+oFCgcQDJptta8AAA2ZSURBVHja7d09buPQeoDh9wtumRRENhBwsoGAA2QDdHVrOhsI5DZVPAtIIS/BQtJfyEXKFBIQpLduitRWnyLWEk4KyR7Z+qFsSz4S+T4sZkzS8jlHEj+eX0ZCkiT9Re4ESJJ0DgyIkiRhQJQkCTAgSpIEGBAlSQIMiJIkAT0PiFFFHUXuVHxTXsv+5PW8WPLHEkXUUeZOhY4v6qhyp2GppwExmhhH4pEJz/EUwy5fsKKOcTzz9JpXLynfJOoYR7Lkvy7KGMYTz0x4ihTjqHOnSMcQRdzGYyQmPEaKxxjkThGpdxsFk42dzwxyp+tEeb3fsvs2d7q6v1Ew3rK7k5+yk5flgOeNnWOK3Oly++L7Wm15Xx+psqYpd6F8e4YLHncc6tzFak9eh7nT1u3Nkj9iWQ53HHg0JF7yRrPjwHPOkBh9W7otJuxubrlK09zpO2peh9zuPHidHnKnr7vint2NP5b8B0TDeOfBh3SdO336nCh5ZFdH1ZyfaZEpXf0KiHu/XjBNV7lTeMS81kz2HJ6nH7lT2FWW/PHEE/t6Xjt2C9sfe28Z4S79ypOuvg2qafYePZuxTt+Q1zKaA19HH2XJH0k07B+IZElepCjYP3wm2/tqQPzY8UvSlhdH6p1KW8l36bbrtNpKqkvf1z5pu/aUuaomG02mMejwh+yv+PuWM/6X/8mdyKNp+9D9H/+dO4kdZckfy9/x1y1n2GR6if6Wv2k54888f0M6Zu+bZjcD4sSagySp8zb68zcDYtHhBp2/5N9bzvgT/5Y7kUczaTn+5z1jUPUVbSX/X/xL7iReiH/ijy1ndGgYXI/8A//YcsY/f0sryjzN3+74w/sz0qLLjRAxb+mk/8/ujFqLWcutzbg7eT0vrSX/H5b8YaJqCYgzS/ISxaI1IP5rnokXfRtU0zYDrEszxPqU1/NiyR+LJdlJacZ87wkPueYh9i0g3rGvoO9yvQ0nMdr7oRul+cGvpI8Z7f2UWfIHS3NGew4v9h7VObvbezTb+9qzgJgW7J7wOWt5ky5MWnCz8+CcTBNf+8CSP6JfzHYeu+nUDWyvpNGe2v1dvobwngVESKMdF6sZV137eqXpjrzOue5aXs9Letj5KbPkPyQtuNkREm9cAu+i3ewYrTLKtUoN0L/FvRMJ6o2ll4ddXSiYauPZHvddzet5bZb80Uqy2Fjge5L3mQhuR3pnh++ed/FEkzdFPVvL9LeoaCgpmDHP14X7jXktKJkxZ2oP1vex5I8lChpKKhbMeUizr7+izkEU1FSr93WWv87f24AoSdK63vUhSpK0jQFRkiQMiJIkAQZESZKALWuZStK5ipKSkjm4iqmOr3ejTOOW4oDTpt34usVwxzLTMxZMHbx+SjGkejOlvKBklH9g+aWKigE1xapMKwoeGHXje9pHMTzkrO+epN/XGuLywUcPG6t9Vq9Pg+zGF222ltv1FTYLGoYx55cX6JNZfraWZT9lxoIZ3oJ8SpQMaZiuf15jwJAmRunmK6+sbBYUFAyAzStxQbW6lf/uVWtyr1WQaYWERCJtPVLwSGKYO4VHz+3zxt5bUtdyen7b6h9XqPlKGd7yzPPmGiYUPJEY506f26ff2YLElmtTIsGAtP0afcqtl4NqYlkL3FoHXC3M3I364d7cpjumwG3UH31FHeql7Lu9EtJpxT1D5vzcbMtYfVebwxrfdIb2XYlHPHz/dbiXAXH1Nuxovupcz9ru3C73DXInsMP2ftLULsYMmHO1fdm7NGUKDOKQcQE6P8tm0V3fjwxLHfYzIC7fhn13H126hLXl1ovJ6bR/0rRH3NPA3ieETOG1J0qXZk8NEchwHe5nQKzh/bDtKNd/6lQTVw0sttZ7l3l2yenT2fJJ06HilgFwt7fN5mXMqS5OFFTsujZl0sOAuK1PLRru137sUIjY3V8aJQ3Q9uxqfVq03f9qjyi5BRYHfT4NiJdo65U4mrUfv/1K3MdpF9v6der1n9OP3Ek8cW6XlkMRbnwo0cnYg/gVyxnDdwe11pQHnKNzs60HccDo5b85HhTcwxriZr9OVDSdvY/f0YsVQxoW3KTRh19Rh7IH8dOiXPUL+vnsro0aYpTUeb8v/a0hvjRoFVQMKDrbz7PRgxglNbeUjLizdnhS9iB+3mrCdmv90JuOC7XZgxgV98zyjt/oXUBchcHFagURKCnp7BfqZY5hTF531Sz7ZUadGjh0huxB/JJlT1J76Tkw7FK9vTYVq1ubzCMaehcQV2/D6Hf7dJQ8dbafZ5nbXy8No1FRMqCmYdrZPJ8LexA/LYpVoGsvPUv5Ui0D4Oj1pqegocn9TvYvIG40saR5zDt7H/8ut2nGjIeYUDOJH9YRT8rGvM9bjRptG5AfFSWwwBV5L8/yVuZhrcl0kX8sR/8G1Wz060RB+ebn+4++5Blb9iC+b1Aa4WTm09vTgxjVm8Hl2q69IXQ18MZbu0uzYw5i5h7E3gXErf06xXq7dQy6M4R7Zy/WYpVvnUxLD+LQ0j9AS0CMgoZDZyrqvGz7fmQeYQr9azLd0uOQ5m8eMXLboa/Xrv4Vl/M+vT19W1FSc507gWftsFu2j8xU1HnZMgcxx7zD93pWQ2zr14kGOjQzb1dul/u9jJzSvk/arY18+6UZC1rWn4maW2CUunMD2ydnOga7bwFx78ywKBh2qnt+1yqmjsw7vZ2ftKgYnN+F4OyMYHmDChBFDOM5UkxenmsRBWNg9u0PkNURnOMqpku9CoitM8OGb/sTL9uu3L5//mFU4fCaI9uzgmzBmHnq0m3Xadyx4GU2Iowp+JGCB8YAUTChYMaVNe2LdKb1w54FxL39OkWMGRywMsblOLQeOHCAx9HtKPuoeaTsVCvEiaQFv4AmBquOjJu0gDSiijIqHqkYpZ8d+rb2y/7nIGbUm0E1UVCt7jdnG/sLapplB33udB49t0Tx9rKRprH4HQKjpuZn7vR2ybZPWhRUlDQvy0LkTuMlSKOAe+6jYP07O2NIw5xra9mXKZZXW4AiqrNrNE092KgPPHGcO6Uny2317oxnEvfUDHl6e8zt6GX/fpvkTuXlbFRMSDzzzICaIWMSTwzWzhjkS53bh9/P7d+PIne6fm+RckdkZRAFAyoKZg5a13mLkma14vCMBQ2LdPV6rOa+Uw9rU2YGREkXIyZUrBYdjIIJ03OYvaau6NegGkmXrlg+2jpqJpT2x+qYejOoRlJHDF4nCvlETx2VNURJl2M9AM5sLtVxGRAlXY671yUHH7j60itJGxxUI+mCREFDwfTsZrCpAwyIkiRhk6kkSYABUZIkwIAoSRJgQJQkCTAgSpIEGBAlSQIMiJIkAQZESZIAA6IkSYABUZIkwIAoSRJgQJQkCTAgSpIEGBAlSQIMiJIkAQZESZIAA6IkSYABUZIkwIAoSRJgQJQkCTAgSpIEGBAlSQIMiJIkAQZESZIAA6IkSYABUZIkwIAoSRJgQJQkCTAgSpIEGBAlSQIMiJIkAQZESZIAA6IkSQD8IXcCpPMWAxpmazsKSn6lGUAMKZmvHSsp0tWX/tqQCqiBqzTNnXepXwyI0n5zZkBNBcCIBTMWr8cABhTAghFziJJHptykxSf/2jIcSvp2kXKnQLoAUTMBSLHl2JBb4C79glVALJhxk2Yf+hO/X6/iEWuI0rezD1E6qjTnByMqJtF88hU+GUglfY0BUTqytEg3/GDKOIa50yLpcAZE6QTSPF1zRRWTKHKnRdJhHFQjnUiaMo3mk4NrJH07a4jSCaWH3CmQdChriNLRRUn1Mk0jreYpRkVFCcBDmkE0VJTMme0LmjGgbD9ry98frP7+nFka5S4P6TJYQ5SOr+Z2tZWv+xoGq31FVPFEzYwRJeN43N7PGFU8UbWdteX3hkxYcMcv7oD7eIoqd4FIl8AaovQBsW3S/EagSiNGLzMXX/f9gmgYAxUDrleTK6YxoWbIzcarHnbWZgorboH5ahbjNOYMmcTPNG//XanfnJgvHeA1vG2bLF9S8joxf+13Eu+m10fBM7Dg6vdcw+W0/rcT/iMdctaOlC6XCXhI1697nigZpQOCqdRv1hClD9i2UukqBB3y24sAmG5OvY9yowZ32FmbRjQUrPc4ThnQHFK7lPrNgCh9t21BrdzYe9hZG9KcH+92LdjSrCvpPQOi1ElRUVNQwdrAHkl7OMpU6pwYxhOP1Cy44xrnQkoHsYYodUoUTKiY8fOlD/KAkTiSMCBKXTOhYs6VS8ZJH2WTqdQhsVyh5m57OIxBDHKnUDpf1hClLlkOoHk7FrV6d1TSVtYQpW9z2OJrX3pg1DIUrgW+qN4ERNerkXYyIEqtomK1ZFs08a6WFfXqWBP171AWxerhwIPf50exmsBfru0rV8Hr9XcPO2unB2bA8GX10qgYcs0C4jZK6q0r7UhaSm5ubns2hlt21qtjk81jW35nsu3cRHr/9Zscetbe9BYMeSYxYcgjE6oEA55JPNPkLk03t3PeXMtU6qCoKID568OnCsrNpeAkrTMgSpKEfYiSJAEGREmSAAOiJEmAAVGSJMCAKEkSYECUJAkwIEqSBBgQJUkCDIiSJAEGREmSAAOiJEmAAVGSJMCAKEkSYECUJAkwIEqSBBgQJUkCDIiSJAEGREmSAAOiJEmAAVGSJAD+HyX5JyTe5PrTAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDI2LTA1LTEwVDA3OjE2OjEyKzAwOjAwLZfC4wAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyNi0wNS0xMFQwNzoxNjoxMiswMDowMFzKel8AAAAodEVYdGRhdGU6dGltZXN0YW1wADIwMjYtMDUtMTBUMDc6MTY6MTIrMDA6MDAL31uAAAAAJ3RFWHRwZGY6SGlSZXNCb3VuZGluZ0JveAAyMTYuOTgyeDMzLjY4NCswKzBlaOudAAAAE3RFWHRwZGY6VmVyc2lvbgBQREYtMS41UzZawQAAAABJRU5ErkJggg==" alt="Hình minh họa" onclick="window.open(this.src, '_blank')"></div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${R}$, ${L}$, ${Q}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">${R}$, ${Q}$.</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">C</div> <div class="opt-text">${R}$, ${L}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">${L}$, ${Q}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-9">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Trong hình dưới, hãy chỉ ra tất cả các điểm nằm giữa hai điểm ${E}$ và ${Q}$.<br><br><div class="img-container"><img src="data:image/png;base64,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" class="real-image" alt="Hình minh họa" onclick="window.open(this.src, '_blank')"></div><br><br>A. ${R}$, ${L}$,  ${Q}$.	   B. ${R}$, ${Q}$.	    C. ${R}$, ${L}$.	     D. ${L}$, ${Q}$.<br><br>Lời giải:<br> Chọn C <br> Các điểm nằm giữa ${E}$ và ${Q}$ là ${R}$, ${L}$.</div></div></div></div><div class="slide-container" id="slide-10"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 11:</span> Hương dùng thước đo độ dài đoạn thẳng ${FR}$. Vì thước bị gãy mất một mẫu nên Hương chỉ có thể đặt thước để điểm ${F}$ trùng với vạch ${8}$ cm. Khi đó điểm ${R}$ trùng với vạch ${10}$cm. Em hãy giúp Hương tính độ dài đoạn thẳng ${FR}$</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${0}$${6}$.</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">B</div> <div class="opt-text">${2}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">${5}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">${3}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-10">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Hương dùng thước đo độ dài đoạn thẳng ${FR}$. Vì thước bị gãy mất một mẫu nên Hương chỉ có thể đặt thước để điểm ${F}$ trùng với vạch ${8}$ cm. Khi đó điểm ${R}$ trùng với vạch ${10}$cm. Em hãy giúp Hương tính độ dài đoạn thẳng ${FR}$<br><br>A. ${0}$${6}$.	   B. ${2}$.	    C. ${5}$.	     D. ${3}$.<br><br>Lời giải:<br> Chọn B <br>  Ta có khoảng cách từ vạch số ${8}$ đến vạch số ${10}$ là $10-8=2$ đơn vị.<br><br>Vậy độ dài đoạn thẳng ${FR}$ là ${2}$ cm.</div></div></div></div><div class="slide-container" id="slide-11"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 12:</span> Lấy đoạn thẳng ${KO=20}$cm trên đường thẳng ${xy}$. Lấy điểm ${F}$ sao cho ${O}$ là trung điểm của đoạn thẳng ${KF}$. Tính độ dài đoạn thẳng ${OF}$ và ${KF}$.</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${41}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">${39}$.</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">C</div> <div class="opt-text">${40}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">${44}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-11">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Lấy đoạn thẳng ${KO=20}$cm trên đường thẳng ${xy}$. Lấy điểm ${F}$ sao cho ${O}$ là trung điểm của đoạn thẳng ${KF}$. Tính độ dài đoạn thẳng ${OF}$ và ${KF}$.<br><br>A. ${41}$.	   B. ${39}$.	    C. ${40}$.	     D. ${44}$.<br><br>Lời giải:<br> Chọn C <br>  Do ${O}$ là trung điểm của đoạn thẳng ${KF}$ nên ${FO=KO=20; FK=2\cdot KO=2\cdot 20=40}$ cm</div></div></div></div><div class="slide-container" id="slide-12"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN II (Đúng-Sai)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 1:</span> Điền đúng (Đ) hoặc sai (S) vào các khẳng định sau:</div><div class="tf-container"><div class="tf-row" data-correct="false"><div class="tf-content"><b>a)</b> Số đối của $2,7$ là $2,7$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div><div class="tf-row" data-correct="false"><div class="tf-content"><b>b)</b> Phân số $\frac{40}{7}$ viết dưới dạng hỗn số là $5\frac{5}{7}$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div><div class="tf-row" data-correct="true"><div class="tf-content"><b>c)</b> Phân số $\frac{2}{5}$ viết dưới dạng số thập phân là $0,4$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div><div class="tf-row" data-correct="true"><div class="tf-content"><b>d)</b> Phân số $\frac{-3}{4}$ nhỏ hơn phân số $\frac{-3}{8}$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerTF(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-12">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Điền đúng (Đ) hoặc sai (S) vào các khẳng định sau:<br><br>a) Số đối của $2,7$ là $2,7$.<br><br>b) Phân số $\frac{40}{7}$ viết dưới dạng hỗn số là $5\frac{5}{7}$.<br><br>c) Phân số $\frac{2}{5}$ viết dưới dạng số thập phân là $0,4$.<br><br>d) Phân số $\frac{-3}{4}$ nhỏ hơn phân số $\frac{-3}{8}$.<br>Lời giải:<br>a-sai, b-sai, c-đúng, d-đúng.<br><br>a) Số đối của một số $a$ là số $-a$. Vậy số đối của $2,7$ là $-2,7$.<br><br>b) Ta có $40 : 7 = 5$ dư ${5}$. Vậy phần nguyên là ${5}$, tử số của phần phân số là $5$.<br><br>c) Thực hiện phép chia tử số cho mẫu số: $2 : 5 = 0,4$. Vậy khẳng định trên là đúng.<br><br>d) Quy đồng mẫu số hoặc so sánh số đối: $\frac{3}{4} &gt; \frac{3}{8}$ nên $\frac{-3}{4} &lt; \frac{-3}{8}$.</div></div></div></div><div class="slide-container" id="slide-13"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN II (Đúng-Sai)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 2:</span> Dựa trên các quy tắc cộng, trừ phân số và tính chất cơ bản, hãy xét tính đúng sai của các khẳng định sau:</div><div class="tf-container"><div class="tf-row" data-correct="false"><div class="tf-content"><b>a)</b> Hiệu $\frac{1}{5} - \frac{1}{6}$ có giá trị bằng $\frac{2}{30}$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div><div class="tf-row" data-correct="false"><div class="tf-content"><b>b)</b> Lam được mẹ mua cho một chiếc bạnh pizza, Lam ăn hết ${\frac{3}{10}}$ chiếc bánh và cho bạn ${\frac{1}{10}}$ chiếc bánh, Lam còn lại ${\frac{9}{10}}$ phần chiếc bánh.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div><div class="tf-row" data-correct="false"><div class="tf-content"><b>c)</b> Biểu thức $A = \left( \frac{3}{9} + \frac{1}{5} \right) + \frac{6}{9}$ có giá trị là $1$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div><div class="tf-row" data-correct="true"><div class="tf-content"><b>d)</b> Giá trị của $x$ thỏa mãn $x + \frac{1}{3} = \frac{1}{2}$ là $x = \frac{1}{6}$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerTF(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-13">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Dựa trên các quy tắc cộng, trừ phân số và tính chất cơ bản, hãy xét tính đúng sai của các khẳng định sau:<br><br>a) Hiệu $\frac{1}{5} - \frac{1}{6}$ có giá trị bằng $\frac{2}{30}$.<br><br>b) Lam được mẹ mua cho một chiếc bạnh pizza, Lam ăn hết ${\frac{3}{10}}$ chiếc bánh và cho bạn ${\frac{1}{10}}$ chiếc bánh, Lam còn lại ${\frac{9}{10}}$ phần chiếc bánh.<br><br>c) Biểu thức $A = \left( \frac{3}{9} + \frac{1}{5} \right) + \frac{6}{9}$ có giá trị là $1$.<br><br>d) Giá trị của $x$ thỏa mãn $x + \frac{1}{3} = \frac{1}{2}$ là $x = \frac{1}{6}$.<br>Lời giải:<br>a-sai, b-sai, c-sai, d-đúng.<br><br>a) Quy đồng vế trái: $\frac{1}{5} - \frac{1}{6} = \frac{6}{30} - \frac{5}{30} = \frac{1}{30}$. Đây là công thức tách phân số quan trọng.<br><br>b) Lam được mẹ mua cho một chiếc bạnh pizza, Lam ăn hết ${\frac{3}{10}}$ chiếc bánh và cho bạn ${\frac{1}{10}}$ chiếc bánh, Lam còn lại $1-\frac{3}{10}-\frac{1}{10} =\frac{3}{5}$ phần chiếc bánh<br><br>c) Áp dụng tính chất kết hợp: $A = \left( \frac{3}{9} + \frac{6}{9} \right) + \frac{1}{5} = 1 + \frac{1}{5} = \frac{6}{5}$.<br><br>d) Để tìm $x$, ta thực hiện phép trừ: $x = \frac{1}{2} - \frac{1}{3}$. Quy đồng mẫu chung là 6, ta được $x = \frac{3 - 2}{6} = \frac{1}{6}$.</div></div></div></div><div class="slide-container" id="slide-14"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN II (Đúng-Sai)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 3:</span> Dựa trên quy tắc nhân và chia phân số, hãy xét tính đúng sai của các khẳng định sau:</div><div class="tf-container"><div class="tf-row" data-correct="false"><div class="tf-content"><b>a)</b> Phân số nghịch đảo của $\frac{-5}{12}$ là $\frac{5}{12}$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div><div class="tf-row" data-correct="true"><div class="tf-content"><b>b)</b> Giá trị của biểu thức $8 \cdot \left( \frac{-3}{3} \right)$ là $\frac{-8}{1}$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div><div class="tf-row" data-correct="true"><div class="tf-content"><b>c)</b> Để tính $\frac{2}{7} : \frac{2}{8}$, ta lấy $\frac{2}{7}$ nhân với $\frac{8}{2}$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div><div class="tf-row" data-correct="false"><div class="tf-content"><b>d)</b> Kết quả của phép tính $\frac{-8}{2} \cdot \frac{7}{5}$ là $\frac{56}{10}$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerTF(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-14">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Dựa trên quy tắc nhân và chia phân số, hãy xét tính đúng sai của các khẳng định sau:<br><br>a) Phân số nghịch đảo của $\frac{-5}{12}$ là $\frac{5}{12}$.<br>b) Giá trị của biểu thức $8 \cdot \left( \frac{-3}{3} \right)$ là $\frac{-8}{1}$.<br>c) Để tính $\frac{2}{7} : \frac{2}{8}$, ta lấy $\frac{2}{7}$ nhân với $\frac{8}{2}$.<br>d) Kết quả của phép tính $\frac{-8}{2} \cdot \frac{7}{5}$ là $\frac{56}{10}$.<br>Lời giải:<br>a-sai, b-đúng, c-đúng, d-sai.<br><br>a) Phân số nghịch đảo của $\frac{a}{b}$ là $\frac{b}{a}$ (với $a, b \neq 0$). Lưu ý phân số nghịch đảo khác với số đối ($\frac{5}{12}$ là số đối của $\frac{-5}{12}$).<br><br>b) Khi nhân một số nguyên với một phân số, ta nhân số nguyên đó với tử số và giữ nguyên mẫu số: $\frac{8 \cdot (-3)}{3} = \frac{-24}{3}$.<br><br>c) Muốn chia một phân số cho một phân số khác (khác 0), ta lấy phân số thứ nhất nhân với phân số nghịch đảo của phân số thứ hai.<br><br>d) Quy tắc nhân hai phân số: tử nhân tử và mẫu nhân mẫu. $\frac{-8}{2} \cdot \frac{7}{5} = \frac{-8 \cdot 7}{2 \cdot 5} = \frac{-56}{10}$. Sau khi rút gọn ta được $\frac{-28}{5}$.</div></div></div></div><div class="slide-container" id="slide-15"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN II (Đúng-Sai)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 4:</span> Hãy vận dụng các tính chất và quy tắc phép nhân, phép chia phân số để kiểm tra tính đúng sai:</div><div class="tf-container"><div class="tf-row" data-correct="false"><div class="tf-content"><b>a)</b> Biểu thức $B = \left( \frac{2}{3} \cdot \frac{3}{4} \right) : \frac{5}{2}$ có kết quả tối giản là $\frac{2}{4}$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div><div class="tf-row" data-correct="false"><div class="tf-content"><b>b)</b> Số $x$ thỏa mãn $\frac{3}{5} : x = \frac{1}{9}$ là $x = \frac{5}{27}$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div><div class="tf-row" data-correct="true"><div class="tf-content"><b>c)</b> Giá trị của biểu thức $A = \frac{3}{10} \cdot \frac{2}{5} + \frac{3}{10} \cdot \frac{3}{5}$ là $\frac{3}{10}$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div><div class="tf-row" data-correct="false"><div class="tf-content"><b>d)</b> Kết quả của phép tính $\left( -\frac{1}{3} \right)^{2}$ là $\frac{1}{9}$.</div><div class="tf-buttons"><div class="btn-tf" onclick="checkTF(this, true)">Đ</div><div class="btn-tf" onclick="checkTF(this, false)">S</div></div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerTF(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-15">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Hãy vận dụng các tính chất và quy tắc phép nhân, phép chia phân số để kiểm tra tính đúng sai:<br><br>a) Biểu thức $B = \left( \frac{2}{3} \cdot \frac{3}{4} \right) : \frac{5}{2}$ có kết quả tối giản là $\frac{2}{4}$.<br>b) Số $x$ thỏa mãn $\frac{3}{5} : x = \frac{1}{9}$ là $x = \frac{5}{27}$.<br>c) Giá trị của biểu thức $A = \frac{3}{10} \cdot \frac{2}{5} + \frac{3}{10} \cdot \frac{3}{5}$ là $\frac{3}{10}$.<br>d) Kết quả của phép tính $\left( -\frac{1}{3} \right)^{2}$ là $\frac{1}{9}$.<br>Lời giải:<br>a-sai, b-sai, c-đúng, d-sai.<br><br>a) Tính trong ngoặc trước: $\frac{2}{3} \cdot \frac{3}{4} = \frac{2}{4}$. Sau đó thực hiện phép chia: $\frac{2}{4} : \frac{5}{2} = \frac{2}{4} \cdot \frac{2}{5} = \frac{4}{20}$, rút gọn được $\frac{1}{5}$.<br><br>b) Trong phép chia, muốn tìm số chia $x$, ta lấy số bị chia chia cho thương: $x = \frac{3}{5} : \frac{1}{9} = \frac{3}{5} \cdot \frac{9}{1} = \frac{27}{5}$.<br><br>c) Sử dụng tính chất phân phối: $A = \frac{3}{10} \cdot \left( \frac{2}{5} + \frac{3}{5} \right) = \frac{3}{10} \cdot 1 = \frac{3}{10}$.<br><br>d) Lũy thừa của một phân số: $\left( \frac{a}{b} \right)^n = \frac{a^n}{b^n}$. Lưu ý: Số âm với mũ lẻ cho kết quả âm, mũ chẵn cho kết quả dương.</div></div></div></div>
+</div>
+
+<div id="resultOverlay" class="result-overlay">
+  <div class="result-card">
+    <div class="result-head">
+      <div>
+        <div class="result-title">KẾT QUẢ BÀI LÀM</div>
+        <div id="resultStudentLine" style="margin-top:6px;color:#49627d;font-size:17px;font-weight:700"></div>
+      </div>
+    </div>
+    <div id="resultSummary" class="result-summary"></div>
+    <div style="overflow:auto">
+      <table class="result-table">
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Loại</th>
+            <th>Nội dung trả lời</th>
+            <th>Đáp án đúng</th>
+            <th>Kết quả</th>
+            <th>Điểm</th>
+          </tr>
+        </thead>
+        <tbody id="resultTableBody"></tbody>
+      </table>
+    </div>
+    <div class="result-actions">
+      <button class="result-btn gray" onclick="returnToHome()">VỀ TRANG CHỦ</button>
+      <button class="result-btn gray" onclick="closeResultOverlay()">Đóng</button>
+      <button class="result-btn primary" onclick="window.print()">In kết quả</button>
+    </div>
+  </div>
+</div>
+
+<div id="rankingOverlay" class="ranking-overlay">
+  <div class="ranking-card">
+    <div class="ranking-head">
+      <div>
+        <div class="ranking-title">BẢNG XẾP HẠNG</div>
+        <div class="ranking-note" id="rankingSourceNote">Nguồn dữ liệu: chưa chọn file lưu kết quả.</div>
+      </div>
+    </div>
+    <div style="overflow:auto">
+      <table class="result-table">
+        <thead>
+          <tr>
+            <th>Hạng</th>
+            <th>Học sinh</th>
+            <th>Tổng điểm</th>
+            <th>Lần nộp</th>
+            <th>Thời điểm</th>
+          </tr>
+        </thead>
+        <tbody id="rankingTableBody"></tbody>
+      </table>
+    </div>
+    <div id="rankingEmpty" class="ranking-empty" style="display:none">Chưa có dữ liệu xếp hạng.</div>
+    <div class="result-actions">
+      <button class="result-btn gray" onclick="closeRankingOverlay()">Đóng</button>
+      <button class="result-btn gray" onclick="selectScoreFile()">Chọn file kết quả</button>
+      <button class="result-btn primary" onclick="createScoreFile()">Tạo file kết quả mới</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentSlide = 0, slides = [], timerInterval = null, examStarted = false, examSubmitted = false;
+let audioCtx = null;
+const SCORE_FILE_NAME = 'Bang_xep_hang_imath.json';
+let scoreFileHandle = null;
+const MUSIC_FILES = ["music_1.mp3", "music_2.mp3", "music_3.mp3"];
+let bgMusic = null;
+let currentMusicIndex = -1;
+let musicEnabled = true;
+
+function getAudioCtx(){ if(!audioCtx){ const Ctx = window.AudioContext || window.webkitAudioContext; if(Ctx) audioCtx = new Ctx(); } return audioCtx; }
+function playSound(type){
+  const ctx = getAudioCtx(); if(!ctx) return; if(ctx.state === 'suspended') ctx.resume();
+  const osc = ctx.createOscillator(), gain = ctx.createGain(), now = ctx.currentTime;
+  osc.connect(gain); gain.connect(ctx.destination);
+  if(type === 'correct'){ osc.type='sine'; osc.frequency.setValueAtTime(800,now); osc.frequency.exponentialRampToValueAtTime(1200,now+.1); gain.gain.setValueAtTime(.35,now); gain.gain.exponentialRampToValueAtTime(.01,now+.25); }
+  else if(type === 'wrong'){ osc.type='sawtooth'; osc.frequency.setValueAtTime(180,now); osc.frequency.exponentialRampToValueAtTime(110,now+.18); gain.gain.setValueAtTime(.28,now); gain.gain.exponentialRampToValueAtTime(.01,now+.25); }
+  else { osc.type='square'; osc.frequency.setValueAtTime(420,now); gain.gain.setValueAtTime(.25,now); gain.gain.exponentialRampToValueAtTime(.01,now+.4); }
+  osc.start(now); osc.stop(now+.4);
+}
+
+function setupBackgroundMusic(){
+  bgMusic = document.getElementById('bgMusic');
+  if(!bgMusic) return;
+  bgMusic.volume = 0.35;
+  bgMusic.addEventListener('ended', ()=>{
+    if(examStarted && !examSubmitted && musicEnabled){
+      playRandomBackgroundMusic();
+    }
+  });
+  bgMusic.addEventListener('error', ()=>{
+    console.log('Không phát được file nhạc:', bgMusic?.src || '');
+    if(examStarted && !examSubmitted && musicEnabled){
+      playRandomBackgroundMusic(true);
+    }
+  });
+}
+function stopBackgroundMusic(){
+  if(!bgMusic) return;
+  try{ bgMusic.pause(); }catch(e){}
+  try{ bgMusic.currentTime = 0; }catch(e){}
+}
+function playRandomBackgroundMusic(forceDifferent=false){
+  if(!musicEnabled) return;
+  if(!bgMusic) setupBackgroundMusic();
+  if(!bgMusic) return;
+  const files = Array.isArray(MUSIC_FILES) ? MUSIC_FILES.filter(Boolean) : [];
+  if(!files.length) return;
+  let idx = Math.floor(Math.random() * files.length);
+  if(forceDifferent && files.length > 1 && idx === currentMusicIndex){
+    idx = (idx + 1 + Math.floor(Math.random() * (files.length - 1))) % files.length;
+  }
+  currentMusicIndex = idx;
+  const chosen = files[idx];
+  bgMusic.src = encodeURI(chosen);
+  bgMusic.load();
+  const p = bgMusic.play();
+  if(p && typeof p.then === 'function'){
+    p.catch(err => console.log('Trình duyệt chặn phát nhạc hoặc không tìm thấy file:', chosen, err));
+  }
+}
+
+function normalizeAnswer(v){ return String(v ?? '').trim().toLowerCase().replace(/\s+/g,'').replace(/,/g,'.'); }
+function decodeB64(b64){ try{return decodeURIComponent(escape(atob(b64 || '')));}catch(e){return '';}}
+function escapeHtml(str){ return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
+
+function getExamId(){
+  const title = document.title || 'Game';
+  return title.replace(/\.html?$/i,'').trim() || 'Game';
+}
+function getLocalRankingKey(){ return 'imath_ranking_' + getExamId(); }
+function safeJsonParse(raw, fallback){ try{ return JSON.parse(raw); }catch(e){ return fallback; } }
+function normalizeRankingRecords(records){
+  if(!Array.isArray(records)) return [];
+  return records.map((r, idx) => ({
+    student: String(r?.student || 'Chưa rõ').trim() || 'Chưa rõ',
+    totalScore: Number(r?.totalScore || 0),
+    submittedAt: String(r?.submittedAt || ''),
+    examId: String(r?.examId || getExamId()),
+    attemptId: String(r?.attemptId || `${Date.now()}_${idx}`),
+    details: Array.isArray(r?.details) ? r.details : []
+  }));
+}
+function compareRanking(a,b){
+  if((b.totalScore||0) !== (a.totalScore||0)) return (b.totalScore||0) - (a.totalScore||0);
+  const ta = Date.parse(a.submittedAt) || 0, tb = Date.parse(b.submittedAt) || 0;
+  return ta - tb;
+}
+function getStoredRankingLocal(){ return normalizeRankingRecords(safeJsonParse(localStorage.getItem(getLocalRankingKey()) || '[]', [])); }
+function setStoredRankingLocal(records){ localStorage.setItem(getLocalRankingKey(), JSON.stringify(normalizeRankingRecords(records))); }
+
+async function readScoreRecordsFromHandle(){
+  if(!scoreFileHandle) return null;
+  const file = await scoreFileHandle.getFile();
+  const txt = await file.text();
+  return normalizeRankingRecords(safeJsonParse(txt || '[]', []));
+}
+async function writeScoreRecordsToHandle(records){
+  if(!scoreFileHandle) return false;
+  const writable = await scoreFileHandle.createWritable();
+  await writable.write(JSON.stringify(normalizeRankingRecords(records), null, 2));
+  await writable.close();
+  return true;
+}
+async function ensureHandlePermission(mode='readwrite'){
+  if(!scoreFileHandle) return false;
+  if((await scoreFileHandle.queryPermission({mode})) === 'granted') return true;
+  return (await scoreFileHandle.requestPermission({mode})) === 'granted';
+}
+async function selectScoreFile(){
+  if(!window.showOpenFilePicker){
+    alert('Trình duyệt này không hỗ trợ chọn file kết quả. Hệ thống sẽ dùng bộ nhớ trình duyệt trên máy này.');
+    return false;
+  }
+  try{
+    const [handle] = await window.showOpenFilePicker({
+      multiple:false,
+      suggestedName:SCORE_FILE_NAME,
+      types:[{description:'JSON files', accept:{'application/json':['.json']}}]
+    });
+    scoreFileHandle = handle;
+    await ensureHandlePermission('readwrite');
+    const records = await readScoreRecordsFromHandle();
+    if(records === null){
+      await writeScoreRecordsToHandle([]);
+    }
+    updateRankingSourceNote();
+    return true;
+  }catch(err){
+    return false;
+  }
+}
+async function createScoreFile(){
+  if(!window.showSaveFilePicker){
+    alert('Trình duyệt này không hỗ trợ tạo file kết quả trực tiếp. Hệ thống sẽ dùng bộ nhớ trình duyệt trên máy này.');
+    return false;
+  }
+  try{
+    scoreFileHandle = await window.showSaveFilePicker({
+      suggestedName:SCORE_FILE_NAME,
+      types:[{description:'JSON files', accept:{'application/json':['.json']}}]
+    });
+    await ensureHandlePermission('readwrite');
+    await writeScoreRecordsToHandle([]);
+    updateRankingSourceNote();
+    alert('Đã tạo file kết quả. Thầy/cô nên lưu file này cùng thư mục chứa Game.html.');
+    return true;
+  }catch(err){
+    return false;
+  }
+}
+async function loadRankingRecords(){
+  if(scoreFileHandle && await ensureHandlePermission('readwrite')){
+    try{
+      const fileRecords = await readScoreRecordsFromHandle();
+      if(fileRecords) return fileRecords.filter(r => (r.examId || getExamId()) === getExamId());
+    }catch(err){}
+  }
+  return getStoredRankingLocal();
+}
+async function saveRankingRecord(record){
+  const localRecords = getStoredRankingLocal();
+  localRecords.push(record);
+  setStoredRankingLocal(localRecords);
+  if(scoreFileHandle && await ensureHandlePermission('readwrite')){
+    try{
+      const fileRecords = await readScoreRecordsFromHandle() || [];
+      fileRecords.push(record);
+      await writeScoreRecordsToHandle(fileRecords);
+    }catch(err){
+      console.warn('Không ghi được file kết quả:', err);
+    }
+  }
+}
+function updateRankingSourceNote(){
+  const el = document.getElementById('rankingSourceNote');
+  if(!el) return;
+  if(scoreFileHandle){
+    el.textContent = 'Nguồn dữ liệu: file ' + (scoreFileHandle.name || SCORE_FILE_NAME) + '.';
+  }else{
+    el.textContent = 'Nguồn dữ liệu: bộ nhớ trình duyệt trên máy này. Muốn lưu chung thư mục Game.html, hãy bấm “Tạo file kết quả mới” hoặc “Chọn file kết quả”.';
+  }
+}
+function formatDateTimeDisplay(v){
+  if(!v) return '';
+  const d = new Date(v);
+  if(isNaN(d.getTime())) return String(v);
+  return d.toLocaleString('vi-VN');
+}
+function buildRankingTable(records){
+  const body = document.getElementById('rankingTableBody');
+  const empty = document.getElementById('rankingEmpty');
+  if(!body || !empty) return;
+  const sorted = [...records].sort(compareRanking);
+  if(!sorted.length){
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  body.innerHTML = sorted.map((r, idx) => {
+    const rank = idx + 1;
+    const rankCls = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+    return `<tr>
+      <td><span class="rank-badge ${rankCls}">${rank}</span></td>
+      <td>${escapeHtml(r.student || 'Chưa rõ')}</td>
+      <td><b>${formatScore(Number(r.totalScore || 0))}</b></td>
+      <td>${idx + 1}</td>
+      <td>${escapeHtml(formatDateTimeDisplay(r.submittedAt))}</td>
+    </tr>`;
+  }).join('');
+}
+async function openRankingBoard(){
+  updateRankingSourceNote();
+  const records = await loadRankingRecords();
+  buildRankingTable(records);
+  document.getElementById('rankingOverlay').classList.add('show');
+}
+function closeRankingOverlay(){ document.getElementById('rankingOverlay').classList.remove('show'); }
+
+function startExam(){
+  const inp = document.getElementById('studentNameInput');
+  const name = (inp.value || '').trim();
+  if(!name){ inp.focus(); inp.style.borderColor = '#ef4444'; return; }
+  localStorage.setItem('imath_student_name', name);
+  document.getElementById('studentBadge').textContent = '👤 Học sinh: ' + name;
+  document.body.classList.remove('before-start');
+  document.getElementById('startScreen').style.display = 'none';
+  examStarted = true;
+  setupBackgroundMusic();
+  playRandomBackgroundMusic();
+  renderSlide(0);
+  updateProgress();
+}
+
+function renderSlide(i){
+  const all = document.querySelectorAll('.slide-container');
+  if(!all.length) return;
+  currentSlide = Math.max(0, Math.min(i, all.length - 1));
+  all.forEach((s, idx) => s.classList.toggle('active', idx === currentSlide));
+  all.forEach((s, idx) => { const c = s.querySelector('.slide-counter'); if(c) c.textContent = `Câu ${idx + 1} / ${all.length}`; });
+  updateProgress();
+  if(window.MathJax?.typesetPromise) MathJax.typesetPromise([all[currentSlide]]).catch(()=>{});
+}
+function nextSlide(){ if(!examStarted) return; renderSlide(currentSlide + 1); }
+function prevSlide(){ if(!examStarted) return; renderSlide(currentSlide - 1); }
+function changeFontSize(delta){
+  const root = document.documentElement; const styles = getComputedStyle(root);
+  const base = parseFloat(styles.getPropertyValue('--base-size')) || 32;
+  const opt = parseFloat(styles.getPropertyValue('--opt-size')) || 28;
+  root.style.setProperty('--base-size', Math.max(16, base + delta) + 'px');
+  root.style.setProperty('--opt-size', Math.max(14, opt + delta) + 'px');
+}
+function startTimer(el){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval = null; el.classList.remove('running'); return; }
+  let timeLeft = parseInt(el.getAttribute('data-time') || '60', 10);
+  el.classList.add('running');
+  timerInterval = setInterval(()=>{
+    timeLeft -= 1;
+    if(timeLeft < 0){ clearInterval(timerInterval); timerInterval = null; el.classList.remove('running'); el.textContent = '⏰ Hết giờ'; playSound('timeup'); return; }
+    const mm = String(Math.floor(timeLeft / 60)).padStart(2,'0');
+    const ss = String(timeLeft % 60).padStart(2,'0');
+    el.textContent = `⏳ ${mm}:${ss}`;
+    el.setAttribute('data-time', String(timeLeft));
+  }, 1000);
+}
+function editTimer(el){
+  const raw = prompt('Nhập số phút cho bộ đếm giờ:', '1');
+  if(raw === null) return;
+  const minutes = Math.max(1, parseInt(raw, 10) || 1); const seconds = minutes * 60;
+  el.setAttribute('data-time', String(seconds));
+  el.textContent = `⏳ Bắt đầu (${String(minutes).padStart(2,'0')}:00)`;
+  if(timerInterval){ clearInterval(timerInterval); timerInterval = null; el.classList.remove('running'); }
+}
+function showFeedback(ok, slide){
+  let pop = slide.querySelector('.feedback-popup');
+  if(!pop){ pop = document.createElement('div'); pop.className = 'feedback-popup'; pop.innerHTML = '<div class="emoji"></div><div class="message"></div>'; slide.appendChild(pop); }
+  pop.className = 'feedback-popup ' + (ok ? 'correct' : 'wrong');
+  pop.querySelector('.emoji').textContent = ok ? '🎉' : '❌';
+  pop.querySelector('.message').textContent = ok ? 'Đã lưu lựa chọn' : 'Đã lưu lựa chọn';
+  requestAnimationFrame(()=>pop.classList.add('pop')); setTimeout(()=>pop.classList.remove('pop'), 650);
+}
+function checkChoice(btn, isCorrect){
+  const slide = btn.closest('.slide-container'); if(!slide || examSubmitted) return;
+  slide.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected-answer'));
+  btn.classList.add('selected-answer');
+  slide.dataset.answered = 'true';
+  showFeedback(true, slide);
+  updateProgress();
+}
+function revealAnswerMC(btn){
+  const slide = btn.closest('.slide-container');
+  const corr = slide.querySelector('.btn-option[data-correct="true"]');
+  if(corr) corr.classList.add('correct');
+  const selected = slide.querySelector('.btn-option.selected-answer');
+  if(selected && selected !== corr) selected.classList.add('wrong');
+}
+function checkTF(btn, userChoice){
+  const row = btn.closest('.tf-row'); const slide = btn.closest('.slide-container'); if(!row || examSubmitted) return;
+  row.querySelectorAll('.btn-tf').forEach(b => b.classList.remove('selected-answer','user-correct','user-wrong'));
+  btn.classList.add('selected-answer');
+  row.dataset.userChoice = String(userChoice);
+  const allRows = slide.querySelectorAll('.tf-row');
+  const done = Array.from(allRows).every(r => ['true','false'].includes(r.dataset.userChoice));
+  if(done) slide.dataset.answered = 'true';
+  showFeedback(true, slide); updateProgress();
+}
+function revealAnswerTF(btn){
+  const slide = btn.closest('.slide-container');
+  slide.querySelectorAll('.tf-row').forEach(row => {
+    const isTrue = row.getAttribute('data-correct') === 'true';
+    row.querySelectorAll('.btn-tf').forEach(b => {
+      if(b.innerText==='Đ' && isTrue) b.classList.add('reveal-true');
+      if(b.innerText==='S' && !isTrue) b.classList.add('reveal-false');
+    });
+    const selected = row.querySelector('.btn-tf.selected-answer');
+    if(selected){
+      const chosen = selected.innerText.trim() === 'Đ';
+      selected.classList.add(chosen === isTrue ? 'user-correct' : 'user-wrong');
+    }
+  });
+}
+function checkShort(btn, b64){
+  const slide = btn.closest('.slide-container'); const inp = slide.querySelector('input'); if(!inp || examSubmitted) return;
+  slide.dataset.answered = normalizeAnswer(inp.value) ? 'true' : 'false';
+  showFeedback(true, slide); updateProgress();
+}
+function revealShort(btn, b64){
+  const slide = btn.closest('.slide-container'); const input = slide.querySelector('input');
+  if(input) input.value = decodeB64(b64);
+}
+function toggleExpl(btn){ const box = btn.closest('.slide-container').querySelector('.explanation-box'); box.style.display = box.style.display==='block' ? 'none' : 'block'; }
+function handleEnter(e, id, b64){ if (e.key === 'Enter') checkShort(document.getElementById('btn-chk-'+id), b64); }
+function initSlides(data){ slides = Array.isArray(data) ? data : []; renderSlide(0); updateProgress(); }
+function initImageZoom(){ document.querySelectorAll('.real-image').forEach(img => img.addEventListener('wheel', function(e){ e.preventDefault(); let h = img.clientHeight; let delta = e.deltaY < 0 ? 40 : -40; let nh = h + delta; if(nh >= 150 && nh <= 1200){ img.style.maxHeight='none'; img.style.height = nh + 'px'; img.style.width='auto'; } })); }
+function updateProgress(){
+  const total = slides.length; let answered = 0;
+  document.querySelectorAll('.slide-container').forEach((slide, idx) => {
+    const type = slides[idx]?.type;
+    let ok = false;
+    if(type === 'mc') ok = !!slide.querySelector('.btn-option.selected-answer');
+    else if(type === 'tf') ok = Array.from(slide.querySelectorAll('.tf-row')).every(r => ['true','false'].includes(r.dataset.userChoice));
+    else if(type === 'short') ok = !!normalizeAnswer(slide.querySelector('input')?.value || '');
+    if(ok) answered += 1;
+  });
+  const el = document.getElementById('progressBadge'); if(el) el.textContent = `📝 Tiến độ: ${answered}/${total} câu`;
+}
+function getMcUserAnswer(slide){ const sel = slide.querySelector('.btn-option.selected-answer'); return sel ? (sel.querySelector('.opt-badge')?.textContent || '').trim() : 'Chưa trả lời'; }
+function getMcCorrectAnswer(slide){ const corr = slide.querySelector('.btn-option[data-correct="true"]'); return corr ? (corr.querySelector('.opt-badge')?.textContent || '').trim() : ''; }
+function getTfUserAnswer(slide){ return Array.from(slide.querySelectorAll('.tf-row')).map((row, i) => `${String.fromCharCode(97+i)}) ${row.dataset.userChoice === 'true' ? 'Đ' : row.dataset.userChoice === 'false' ? 'S' : '?'}`).join(' | '); }
+function getTfCorrectAnswer(slide){ return Array.from(slide.querySelectorAll('.tf-row')).map((row, i) => `${String.fromCharCode(97+i)}) ${row.dataset.correct === 'true' ? 'Đ' : 'S'}`).join(' | '); }
+function scoreTf(slide){ let score = 0; slide.querySelectorAll('.tf-row').forEach(row => { const chosen = row.dataset.userChoice; const correct = row.dataset.correct; const selected = row.querySelector('.btn-tf.selected-answer'); if(selected){ const ok = chosen === correct; selected.classList.add(ok ? 'user-correct' : 'user-wrong'); if(ok) score += 0.25; } }); return score; }
+function formatScore(num){ return (Math.round(num * 100) / 100).toFixed(2).replace(/\.00$/, '').replace('.', ','); }
+function submitExam(){
+  if(!examStarted || examSubmitted) return;
+  const total = slides.length;
+  const answered = document.getElementById('progressBadge')?.textContent || '';
+  const sure = confirm(`Bạn có chắc muốn nộp bài không?\n${answered}`);
+  if(!sure) return;
+  examSubmitted = true; document.body.classList.remove('before-submit'); document.body.classList.add('after-submit');
+  let totalScore = 0, details = [];
+  document.querySelectorAll('.slide-container').forEach((slide, idx) => {
+    const meta = slides[idx] || {}; let score = 0, userAns = 'Chưa trả lời', correctAns = '', result = false, typeLabel = '';
+    if(meta.type === 'mc'){
+      typeLabel = 'Trắc nghiệm'; userAns = getMcUserAnswer(slide); correctAns = getMcCorrectAnswer(slide);
+      const sel = slide.querySelector('.btn-option.selected-answer'); const corr = slide.querySelector('.btn-option[data-correct="true"]');
+      if(corr) corr.classList.add('correct'); if(sel && sel !== corr) sel.classList.add('wrong');
+      result = !!sel && !!corr && sel === corr; score = result ? 1 : 0;
+    }else if(meta.type === 'tf'){
+      typeLabel = 'Đúng-Sai'; userAns = getTfUserAnswer(slide); correctAns = getTfCorrectAnswer(slide);
+      score = scoreTf(slide); result = Math.abs(score - 1) < 1e-9;
+    }else{
+      typeLabel = 'Trả lời ngắn';
+      const input = slide.querySelector('input'); const user = normalizeAnswer(input?.value || ''); const corr = normalizeAnswer(meta.correct_answer || '');
+      userAns = (input?.value || '').trim() || 'Chưa trả lời'; correctAns = meta.correct_answer || '';
+      result = !!corr && user === corr; score = result ? 1 : 0;
+      if(input){ input.style.borderColor = result ? '#22c55e' : '#ef4444'; if(!result && meta.correct_answer) input.value = input.value || ''; }
+    }
+    totalScore += score;
+    details.push({ stt: idx + 1, typeLabel, userAns, correctAns, result, score });
+  });
+  buildResult(details, totalScore);
+  const resultRecord = {
+    student: localStorage.getItem('imath_student_name') || '',
+    totalScore,
+    submittedAt: new Date().toISOString(),
+    examId: getExamId(),
+    attemptId: 'attempt_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+    details
+  };
+  localStorage.setItem('imath_last_result', JSON.stringify(resultRecord));
+  saveRankingRecord(resultRecord);
+  document.getElementById('floatingSubmitBtn').style.display = 'none';
+}
+function buildResult(details, totalScore){
+  const name = localStorage.getItem('imath_student_name') || 'Chưa rõ';
+  document.getElementById('resultStudentLine').textContent = `Học sinh: ${name}`;
+  const mcCount = slides.filter(x => x.type === 'mc').length;
+  const tfCount = slides.filter(x => x.type === 'tf').length;
+  const saCount = slides.filter(x => x.type === 'short').length;
+  document.getElementById('resultSummary').innerHTML = `
+    <div class="summary-box"><div class="k">Học sinh</div><div class="v" style="font-size:20px">${escapeHtml(name)}</div></div>
+    <div class="summary-box"><div class="k">Tổng điểm</div><div class="v">${formatScore(totalScore)}</div></div>
+    <div class="summary-box"><div class="k">Số câu TN</div><div class="v">${mcCount}</div></div>
+    <div class="summary-box"><div class="k">Số câu Đ-S</div><div class="v">${tfCount}</div></div>
+    <div class="summary-box"><div class="k">Số câu TLN</div><div class="v">${saCount}</div></div>
+    <div class="summary-box"><div class="k">Thời điểm nộp</div><div class="v" style="font-size:20px">${escapeHtml(new Date().toLocaleString('vi-VN'))}</div></div>`;
+  document.getElementById('resultTableBody').innerHTML = details.map(d => `
+    <tr>
+      <td>${d.stt}</td>
+      <td>${escapeHtml(d.typeLabel)}</td>
+      <td>${escapeHtml(d.userAns)}</td>
+      <td>${escapeHtml(d.correctAns)}</td>
+      <td>${d.result ? '<span class="badge-ok">Đúng</span>' : '<span class="badge-no">Sai</span>'}</td>
+      <td>${formatScore(d.score)}</td>
+    </tr>`).join('');
+  document.getElementById('resultOverlay').classList.add('show');
+}
+function closeResultOverlay(){ document.getElementById('resultOverlay').classList.remove('show'); }
+function returnToHome(){
+  closeResultOverlay();
+  closeRankingOverlay();
+  examStarted = false;
+  examSubmitted = false;
+  currentSlide = 0;
+  stopBackgroundMusic();
+  document.body.classList.add('before-start','before-submit');
+  document.body.classList.remove('after-submit');
+  const startScreen = document.getElementById('startScreen');
+  if(startScreen) startScreen.style.display = 'flex';
+  const submitBtn = document.getElementById('floatingSubmitBtn');
+  if(submitBtn) submitBtn.style.display = '';
+  document.querySelectorAll('.slide-container').forEach((slide, idx) => {
+    slide.classList.remove('active');
+    slide.dataset.answered = 'false';
+    slide.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected-answer','correct','wrong','disabled'));
+    slide.querySelectorAll('.tf-row').forEach(row => {
+      delete row.dataset.userChoice;
+      row.querySelectorAll('.btn-tf').forEach(b => b.classList.remove('selected-answer','user-correct','user-wrong','reveal-true','reveal-false'));
+    });
+    slide.querySelectorAll('input.answer-input, .short-answer-area input').forEach(inp => {
+      inp.value = '';
+      inp.style.borderColor = '#cdddeb';
+    });
+    slide.querySelectorAll('.explanation-box').forEach(box => box.style.display = 'none');
+  });
+  const timers = document.querySelectorAll('.timer');
+  if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
+  timers.forEach(el => {
+    el.classList.remove('running');
+    el.setAttribute('data-time','60');
+    el.textContent = '⏳ Bắt đầu (01:00)';
+  });
+  updateProgress();
+  const savedName = localStorage.getItem('imath_student_name') || '';
+  const input = document.getElementById('studentNameInput');
+  if(input){ input.value = ''; input.focus(); }
+  const badge = document.getElementById('studentBadge');
+  if(badge) badge.textContent = '👤 Học sinh: Chưa nhập';
+}
+
+let touchStartX = 0, touchEndX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+document.addEventListener('touchend', e => { if(document.activeElement?.tagName === 'INPUT') return; touchEndX = e.changedTouches[0].screenX; let diff = touchStartX - touchEndX; if (Math.abs(diff) > 60) { if (diff > 0) nextSlide(); else prevSlide(); } }, {passive: true});
+document.addEventListener('keydown', e => { if(!examStarted) return; if(e.key === 'ArrowRight') nextSlide(); if(e.key === 'ArrowLeft') prevSlide(); });
+window.addEventListener('DOMContentLoaded', function(){
+  try {
+    const savedName = localStorage.getItem('imath_student_name') || '';
+    document.getElementById('studentNameInput').value = savedName;
+    document.getElementById('studentBadge').textContent = '👤 Học sinh: ' + (savedName || 'Chưa nhập');
+    updateRankingSourceNote();
+    const data = [{"title": "Câu 1", "part": 1, "type": "mc", "content": "Giá trị của ${x}$ để $ \\dfrac{-15}{x} = \\dfrac{-5}{-7} $ là:", "images": [], "explanation": " Giá trị của ${x}$ để  $ \\dfrac{-15}{x} = \\dfrac{-5}{-7} $ là:\n\nA. * ${-21}$.\t   B.  ${-16}$ .\t    C. ${-23}$  .\t     D. ${-20}$  .\n\nLời giải:\n Chọn A \n  Đáp số $x =-21$ \n\n", "options": [{"label": "A", "text": "${-21}$.", "is_correct": true}, {"label": "B", "text": "${-16}$ .", "is_correct": false}, {"label": "C", "text": "${-23}$ .", "is_correct": false}, {"label": "D", "text": "${-20}$ .", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 2", "part": 1, "type": "mc", "content": "Giá trị của ${x, y}$ để $\\dfrac{-1}{8} = \\dfrac{x}{40} = \\dfrac{-2}{y} $ là:", "images": [], "explanation": " Giá trị của ${x, y}$ để $\\dfrac{-1}{8} = \\dfrac{x}{40} = \\dfrac{-2}{y} $ là:\n\nA. * $x =-5$; $y=16$.\t   B. $x =-5$; $y=40$ .\t    C. $x =-2$; $y=16$  .\t     D. $x =-2$; $y=40$.\n\nLời giải:\n Chọn A \n  Đáp số $x =-5$ và $y=16$ \n\n", "options": [{"label": "A", "text": "$x =-5$; $y=16$.", "is_correct": true}, {"label": "B", "text": "$x =-5$; $y=40$ .", "is_correct": false}, {"label": "C", "text": "$x =-2$; $y=16$ .", "is_correct": false}, {"label": "D", "text": "$x =-2$; $y=40$.", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 3", "part": 1, "type": "mc", "content": "Sắp xếp các phân số sau theo thứ tự tăng dần $\\dfrac{2}{5}; \\dfrac{11}{15}; \\dfrac{9}{10}; \\dfrac{16}{15}$", "images": [], "explanation": " Sắp xếp các phân số sau theo thứ tự tăng dần $\\dfrac{2}{5}; \\dfrac{11}{15}; \\dfrac{9}{10}; \\dfrac{16}{15}$\n\nA. $\\dfrac{11}{15}< \\dfrac{2}{5}< \\dfrac{9}{10}< \\dfrac{16}{15}$ .\t   B. $\\dfrac{9}{10}< \\dfrac{11}{15}< \\dfrac{2}{5}< \\dfrac{16}{15}$ .\n    C. * $\\dfrac{2}{5}< \\dfrac{11}{15}< \\dfrac{9}{10}< \\dfrac{16}{15}$.\t     D. $\\dfrac{16}{15}< \\dfrac{11}{15}< \\dfrac{9}{10}< \\dfrac{2}{5}$ .\n\nLời giải:\n Chọn C \n  $\\dfrac{2}{5}< \\dfrac{11}{15}< \\dfrac{9}{10}< \\dfrac{16}{15}$ \n\n", "options": [{"label": "A", "text": "$\\dfrac{11}{15}< \\dfrac{2}{5}< \\dfrac{9}{10}< \\dfrac{16}{15}$ .", "is_correct": false}, {"label": "B", "text": "$\\dfrac{9}{10}< \\dfrac{11}{15}< \\dfrac{2}{5}< \\dfrac{16}{15}$ .", "is_correct": false}, {"label": "C", "text": "$\\dfrac{2}{5}< \\dfrac{11}{15}< \\dfrac{9}{10}< \\dfrac{16}{15}$.", "is_correct": true}, {"label": "D", "text": "$\\dfrac{16}{15}< \\dfrac{11}{15}< \\dfrac{9}{10}< \\dfrac{2}{5}$ .", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 4", "part": 1, "type": "mc", "content": "Tính $\\dfrac{16}{15}+\\dfrac{-8}{12}$ bằng.", "images": [], "explanation": "Tính $\\dfrac{16}{15}+\\dfrac{-8}{12}$ bằng. \n\nA. $\\dfrac{12}{5}$ .\t   B. *$\\dfrac{2}{5}$ .\n    C. $\\dfrac{-3}{5}$ .\t     D.  $\\dfrac{7}{5}$.\n\nLời giải:\n Chọn B \n $\\dfrac{16}{15} +\\dfrac{-8}{12} = \\dfrac{64}{60}+\\dfrac{-40}{60}=\\dfrac{24}{60}= \\dfrac{2}{5}$ \n\n", "options": [{"label": "A", "text": "$\\dfrac{12}{5}$ .", "is_correct": false}, {"label": "B", "text": "$\\dfrac{2}{5}$ .", "is_correct": true}, {"label": "C", "text": "$\\dfrac{-3}{5}$ .", "is_correct": false}, {"label": "D", "text": "$\\dfrac{7}{5}$.", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 5", "part": 1, "type": "mc", "content": "Tính $\\dfrac{-7}{6} : \\dfrac{-10}{7}$ bằng", "images": [], "explanation": "Tính $\\dfrac{-7}{6} : \\dfrac{-10}{7}$ bằng \n\nA. $\\dfrac{-11}{60}$ .\t   B. $\\dfrac{109}{60}$ .\t    C. $\\dfrac{169}{60}$ .\t     D. *  $\\dfrac{49}{60}$.\n\nLời giải:\n Chọn D \n $\\dfrac{-7}{6} : \\dfrac{-10}{7} =\\dfrac{-7}{6} \\cdot \\dfrac{7}{-10} = \\dfrac{-49}{-60}= \\dfrac{49}{60} $   \n\n", "options": [{"label": "A", "text": "$\\dfrac{-11}{60}$ .", "is_correct": false}, {"label": "B", "text": "$\\dfrac{109}{60}$ .", "is_correct": false}, {"label": "C", "text": "$\\dfrac{169}{60}$ .", "is_correct": false}, {"label": "D", "text": "$\\dfrac{49}{60}$.", "is_correct": true}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 6", "part": 1, "type": "mc", "content": "Tính ${\\frac{7}{15}}$ của ${-150}$", "images": [], "explanation": "Tính ${\\frac{7}{15}}$ của ${-150}$ \n\nA. ${-68}$ .\t   B. ${-71}$ .\t    C. ${-69}$ .\t     D. *  ${-70}$.\n\nLời giải:\n Chọn D \n $\\frac{7}{15} \\cdot \\left( -150 \\right)= {-70} $   \n\n", "options": [{"label": "A", "text": "${-68}$ .", "is_correct": false}, {"label": "B", "text": "${-71}$ .", "is_correct": false}, {"label": "C", "text": "${-69}$ .", "is_correct": false}, {"label": "D", "text": "${-70}$.", "is_correct": true}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 7", "part": 1, "type": "mc", "content": "Tìm một số biết ${\\frac{5}{12}}$ của số đó bằng ${25}$", "images": [], "explanation": "Tìm một số biết ${\\frac{5}{12}}$ của số đó bằng ${25}$ \n\nA. ${58}$ .\t   B. *  ${60}$.\t    C. ${62}$ .\t     D. ${57}$ .\n\nLời giải:\n Chọn B \n $25 : \\frac{5}{12} = 60$   \n\n", "options": [{"label": "A", "text": "${58}$ .", "is_correct": false}, {"label": "B", "text": "${60}$.", "is_correct": true}, {"label": "C", "text": "${62}$ .", "is_correct": false}, {"label": "D", "text": "${57}$ .", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 8", "part": 1, "type": "mc", "content": "Tính tỉ số phần trăm (làm tròn đến hàng phần mười) của ${85}$ và ${41}$", "images": [], "explanation": " Tính tỉ số phần trăm (làm tròn đến hàng phần mười) của ${85}$ và ${41}$\n\nA. ${207,34}\\%$ .\t   B. ${207,33}\\%$ .\t    C. * ${207,32}\\%$.\t     D.  ${207,31}\\%$.\n\nLời giải:\n Chọn C \n Tỉ số phần trăm của ${85}$ và ${41}$ là ${207,32}\\%$ \n\n", "options": [{"label": "A", "text": "${207,34}\\%$ .", "is_correct": false}, {"label": "B", "text": "${207,33}\\%$ .", "is_correct": false}, {"label": "C", "text": "${207,32}\\%$.", "is_correct": true}, {"label": "D", "text": "${207,31}\\%$.", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 9", "part": 1, "type": "mc", "content": "Tính ${30} \\%$ của số ${810}$.", "images": [], "explanation": "Tính ${30} \\%$ của số ${810}$.\n\nA. ${246} $ .\t   B. *  ${243} $.\t    C. ${242}$ .\t     D. ${244}$ .\n\nLời giải:\n Chọn B \n ${30} \\%$ của số ${810}$ là $810 \\cdot \\dfrac{30}{100}= 243$  \n\n", "options": [{"label": "A", "text": "${246} $ .", "is_correct": false}, {"label": "B", "text": "${243} $.", "is_correct": true}, {"label": "C", "text": "${242}$ .", "is_correct": false}, {"label": "D", "text": "${244}$ .", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 10", "part": 1, "type": "mc", "content": "Trong hình dưới, hãy chỉ ra tất cả các điểm nằm giữa hai điểm ${E}$ và ${Q}$.", "images": ["2026-05-10_14-16-08.png"], "explanation": "Trong hình dưới, hãy chỉ ra tất cả các điểm nằm giữa hai điểm ${E}$ và ${Q}$.\n\n\n2026-05-10_14-16-08\n\nA. ${R}$, ${L}$,  ${Q}$.\t   B. ${R}$, ${Q}$.\t    C. *${R}$, ${L}$.\t     D. ${L}$, ${Q}$.\n\nLời giải:\n Chọn C \n Các điểm nằm giữa ${E}$ và ${Q}$ là ${R}$, ${L}$.\n\n \n\n", "options": [{"label": "A", "text": "${R}$, ${L}$, ${Q}$.", "is_correct": false}, {"label": "B", "text": "${R}$, ${Q}$.", "is_correct": false}, {"label": "C", "text": "${R}$, ${L}$.", "is_correct": true}, {"label": "D", "text": "${L}$, ${Q}$.", "is_correct": false}], "correct_answer": "", "image_paths": ["data:image/png;base64,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"], "image_lookup": {"2026-05-10_14-16-08.png": "data:image/png;base64,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"}}, {"title": "Câu 11", "part": 1, "type": "mc", "content": "Hương dùng thước đo độ dài đoạn thẳng ${FR}$. Vì thước bị gãy mất một mẫu nên Hương chỉ có thể đặt thước để điểm ${F}$ trùng với vạch ${8}$ cm. Khi đó điểm ${R}$ trùng với vạch ${10}$cm. Em hãy giúp Hương tính độ dài đoạn thẳng ${FR}$", "images": [], "explanation": " Hương dùng thước đo độ dài đoạn thẳng ${FR}$. Vì thước bị gãy mất một mẫu nên Hương chỉ có thể đặt thước để điểm ${F}$ trùng với vạch ${8}$ cm. Khi đó điểm ${R}$ trùng với vạch ${10}$cm. Em hãy giúp Hương tính độ dài đoạn thẳng ${FR}$\n\nA. ${0}$${6}$.\t   B. *${2}$.\t    C. ${5}$.\t     D. ${3}$.\n\nLời giải:\n Chọn B \n  Ta có khoảng cách từ vạch số ${8}$ đến vạch số ${10}$ là $10-8=2$ đơn vị.\n\nVậy độ dài đoạn thẳng ${FR}$ là ${2}$ cm. \n\n", "options": [{"label": "A", "text": "${0}$${6}$.", "is_correct": false}, {"label": "B", "text": "${2}$.", "is_correct": true}, {"label": "C", "text": "${5}$.", "is_correct": false}, {"label": "D", "text": "${3}$.", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 12", "part": 1, "type": "mc", "content": "Lấy đoạn thẳng ${KO=20}$cm trên đường thẳng ${xy}$. Lấy điểm ${F}$ sao cho ${O}$ là trung điểm của đoạn thẳng ${KF}$. Tính độ dài đoạn thẳng ${OF}$ và ${KF}$.", "images": [], "explanation": " Lấy đoạn thẳng ${KO=20}$cm trên đường thẳng ${xy}$. Lấy điểm ${F}$ sao cho ${O}$ là trung điểm của đoạn thẳng ${KF}$. Tính độ dài đoạn thẳng ${OF}$ và ${KF}$.\n\nA. ${41}$.\t   B. ${39}$.\t    C. *${40}$.\t     D. ${44}$.\n\nLời giải:\n Chọn C \n  Do ${O}$ là trung điểm của đoạn thẳng ${KF}$ nên ${FO=KO=20; FK=2\\cdot KO=2\\cdot 20=40}$ cm   \n\n", "options": [{"label": "A", "text": "${41}$.", "is_correct": false}, {"label": "B", "text": "${39}$.", "is_correct": false}, {"label": "C", "text": "${40}$.", "is_correct": true}, {"label": "D", "text": "${44}$.", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 1", "part": 2, "type": "tf", "content": "Điền đúng (Đ) hoặc sai (S) vào các khẳng định sau:", "images": [], "explanation": "Điền đúng (Đ) hoặc sai (S) vào các khẳng định sau:\n\na) Số đối của $2,7$ là $2,7$.\n\nb) Phân số $\\frac{40}{7}$ viết dưới dạng hỗn số là $5\\frac{5}{7}$.\n\nc) *Phân số $\\frac{2}{5}$ viết dưới dạng số thập phân là $0,4$.\n\nd) *Phân số $\\frac{-3}{4}$ nhỏ hơn phân số $\\frac{-3}{8}$.\nLời giải:\na-sai, b-sai, c-đúng, d-đúng.\n\na) Số đối của một số $a$ là số $-a$. Vậy số đối của $2,7$ là $-2,7$.\n\nb) Ta có $40 : 7 = 5$ dư ${5}$. Vậy phần nguyên là ${5}$, tử số của phần phân số là $5$.\n\nc) Thực hiện phép chia tử số cho mẫu số: $2 : 5 = 0,4$. Vậy khẳng định trên là đúng.\n\nd) Quy đồng mẫu số hoặc so sánh số đối: $\\frac{3}{4} > \\frac{3}{8}$ nên $\\frac{-3}{4} < \\frac{-3}{8}$.\n", "options": [{"label": "a)", "text": "Số đối của $2,7$ là $2,7$.", "is_correct": false}, {"label": "b)", "text": "Phân số $\\frac{40}{7}$ viết dưới dạng hỗn số là $5\\frac{5}{7}$.", "is_correct": false}, {"label": "c)", "text": "Phân số $\\frac{2}{5}$ viết dưới dạng số thập phân là $0,4$.", "is_correct": true}, {"label": "d)", "text": "Phân số $\\frac{-3}{4}$ nhỏ hơn phân số $\\frac{-3}{8}$.", "is_correct": true}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 2", "part": 2, "type": "tf", "content": "Dựa trên các quy tắc cộng, trừ phân số và tính chất cơ bản, hãy xét tính đúng sai của các khẳng định sau:", "images": [], "explanation": "Dựa trên các quy tắc cộng, trừ phân số và tính chất cơ bản, hãy xét tính đúng sai của các khẳng định sau:\n\na) Hiệu $\\frac{1}{5} - \\frac{1}{6}$ có giá trị bằng $\\frac{2}{30}$.\n\nb) Lam được mẹ mua cho một chiếc bạnh pizza, Lam ăn hết ${\\frac{3}{10}}$ chiếc bánh và cho bạn ${\\frac{1}{10}}$ chiếc bánh, Lam còn lại ${\\frac{9}{10}}$ phần chiếc bánh.\n\nc) Biểu thức $A = \\left( \\frac{3}{9} + \\frac{1}{5} \\right) + \\frac{6}{9}$ có giá trị là $1$.\n\nd) *Giá trị của $x$ thỏa mãn $x + \\frac{1}{3} = \\frac{1}{2}$ là $x = \\frac{1}{6}$.\nLời giải:\na-sai, b-sai, c-sai, d-đúng.\n\na) Quy đồng vế trái: $\\frac{1}{5} - \\frac{1}{6} = \\frac{6}{30} - \\frac{5}{30} = \\frac{1}{30}$. Đây là công thức tách phân số quan trọng.\n\nb) Lam được mẹ mua cho một chiếc bạnh pizza, Lam ăn hết ${\\frac{3}{10}}$ chiếc bánh và cho bạn ${\\frac{1}{10}}$ chiếc bánh, Lam còn lại $1-\\frac{3}{10}-\\frac{1}{10} =\\frac{3}{5}$ phần chiếc bánh\n\nc) Áp dụng tính chất kết hợp: $A = \\left( \\frac{3}{9} + \\frac{6}{9} \\right) + \\frac{1}{5} = 1 + \\frac{1}{5} = \\frac{6}{5}$.\n\nd) Để tìm $x$, ta thực hiện phép trừ: $x = \\frac{1}{2} - \\frac{1}{3}$. Quy đồng mẫu chung là 6, ta được $x = \\frac{3 - 2}{6} = \\frac{1}{6}$.\n", "options": [{"label": "a)", "text": "Hiệu $\\frac{1}{5} - \\frac{1}{6}$ có giá trị bằng $\\frac{2}{30}$.", "is_correct": false}, {"label": "b)", "text": "Lam được mẹ mua cho một chiếc bạnh pizza, Lam ăn hết ${\\frac{3}{10}}$ chiếc bánh và cho bạn ${\\frac{1}{10}}$ chiếc bánh, Lam còn lại ${\\frac{9}{10}}$ phần chiếc bánh.", "is_correct": false}, {"label": "c)", "text": "Biểu thức $A = \\left( \\frac{3}{9} + \\frac{1}{5} \\right) + \\frac{6}{9}$ có giá trị là $1$.", "is_correct": false}, {"label": "d)", "text": "Giá trị của $x$ thỏa mãn $x + \\frac{1}{3} = \\frac{1}{2}$ là $x = \\frac{1}{6}$.", "is_correct": true}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 3", "part": 2, "type": "tf", "content": "Dựa trên quy tắc nhân và chia phân số, hãy xét tính đúng sai của các khẳng định sau:", "images": [], "explanation": "Dựa trên quy tắc nhân và chia phân số, hãy xét tính đúng sai của các khẳng định sau:\n\na) Phân số nghịch đảo của $\\frac{-5}{12}$ là $\\frac{5}{12}$.\nb) *Giá trị của biểu thức $8 \\cdot \\left( \\frac{-3}{3} \\right)$ là $\\frac{-8}{1}$.\nc) *Để tính $\\frac{2}{7} : \\frac{2}{8}$, ta lấy $\\frac{2}{7}$ nhân với $\\frac{8}{2}$.\nd) Kết quả của phép tính $\\frac{-8}{2} \\cdot \\frac{7}{5}$ là $\\frac{56}{10}$.\nLời giải:\na-sai, b-đúng, c-đúng, d-sai.\n\na) Phân số nghịch đảo của $\\frac{a}{b}$ là $\\frac{b}{a}$ (với $a, b \\neq 0$). Lưu ý phân số nghịch đảo khác với số đối ($\\frac{5}{12}$ là số đối của $\\frac{-5}{12}$).\n\nb) Khi nhân một số nguyên với một phân số, ta nhân số nguyên đó với tử số và giữ nguyên mẫu số: $\\frac{8 \\cdot (-3)}{3} = \\frac{-24}{3}$.\n\nc) Muốn chia một phân số cho một phân số khác (khác 0), ta lấy phân số thứ nhất nhân với phân số nghịch đảo của phân số thứ hai.\n\nd) Quy tắc nhân hai phân số: tử nhân tử và mẫu nhân mẫu. $\\frac{-8}{2} \\cdot \\frac{7}{5} = \\frac{-8 \\cdot 7}{2 \\cdot 5} = \\frac{-56}{10}$. Sau khi rút gọn ta được $\\frac{-28}{5}$.\n", "options": [{"label": "a)", "text": "Phân số nghịch đảo của $\\frac{-5}{12}$ là $\\frac{5}{12}$.", "is_correct": false}, {"label": "b)", "text": "Giá trị của biểu thức $8 \\cdot \\left( \\frac{-3}{3} \\right)$ là $\\frac{-8}{1}$.", "is_correct": true}, {"label": "c)", "text": "Để tính $\\frac{2}{7} : \\frac{2}{8}$, ta lấy $\\frac{2}{7}$ nhân với $\\frac{8}{2}$.", "is_correct": true}, {"label": "d)", "text": "Kết quả của phép tính $\\frac{-8}{2} \\cdot \\frac{7}{5}$ là $\\frac{56}{10}$.", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 4", "part": 2, "type": "tf", "content": "Hãy vận dụng các tính chất và quy tắc phép nhân, phép chia phân số để kiểm tra tính đúng sai:", "images": [], "explanation": "Hãy vận dụng các tính chất và quy tắc phép nhân, phép chia phân số để kiểm tra tính đúng sai:\n\na) Biểu thức $B = \\left( \\frac{2}{3} \\cdot \\frac{3}{4} \\right) : \\frac{5}{2}$ có kết quả tối giản là $\\frac{2}{4}$.\nb) Số $x$ thỏa mãn $\\frac{3}{5} : x = \\frac{1}{9}$ là $x = \\frac{5}{27}$.\nc) *Giá trị của biểu thức $A = \\frac{3}{10} \\cdot \\frac{2}{5} + \\frac{3}{10} \\cdot \\frac{3}{5}$ là $\\frac{3}{10}$.\nd) Kết quả của phép tính $\\left( -\\frac{1}{3} \\right)^{2}$ là $\\frac{1}{9}$.\nLời giải:\na-sai, b-sai, c-đúng, d-sai.\n\na) Tính trong ngoặc trước: $\\frac{2}{3} \\cdot \\frac{3}{4} = \\frac{2}{4}$. Sau đó thực hiện phép chia: $\\frac{2}{4} : \\frac{5}{2} = \\frac{2}{4} \\cdot \\frac{2}{5} = \\frac{4}{20}$, rút gọn được $\\frac{1}{5}$.\n\nb) Trong phép chia, muốn tìm số chia $x$, ta lấy số bị chia chia cho thương: $x = \\frac{3}{5} : \\frac{1}{9} = \\frac{3}{5} \\cdot \\frac{9}{1} = \\frac{27}{5}$.\n\nc) Sử dụng tính chất phân phối: $A = \\frac{3}{10} \\cdot \\left( \\frac{2}{5} + \\frac{3}{5} \\right) = \\frac{3}{10} \\cdot 1 = \\frac{3}{10}$.\n\nd) Lũy thừa của một phân số: $\\left( \\frac{a}{b} \\right)^n = \\frac{a^n}{b^n}$. Lưu ý: Số âm với mũ lẻ cho kết quả âm, mũ chẵn cho kết quả dương.\n", "options": [{"label": "a)", "text": "Biểu thức $B = \\left( \\frac{2}{3} \\cdot \\frac{3}{4} \\right) : \\frac{5}{2}$ có kết quả tối giản là $\\frac{2}{4}$.", "is_correct": false}, {"label": "b)", "text": "Số $x$ thỏa mãn $\\frac{3}{5} : x = \\frac{1}{9}$ là $x = \\frac{5}{27}$.", "is_correct": false}, {"label": "c)", "text": "Giá trị của biểu thức $A = \\frac{3}{10} \\cdot \\frac{2}{5} + \\frac{3}{10} \\cdot \\frac{3}{5}$ là $\\frac{3}{10}$.", "is_correct": true}, {"label": "d)", "text": "Kết quả của phép tính $\\left( -\\frac{1}{3} \\right)^{2}$ là $\\frac{1}{9}$.", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}];
+    initSlides(data); initImageZoom();
+  } catch(err) {
+    document.body.innerHTML = "<div style='padding:30px; text-align:center; font-family:sans-serif;'><h2 style='color:#dc2626; font-size:24px;'>⚠️ LỖI HIỂN THỊ</h2><p style='font-size:18px; color:#334155;'>Không thể tải giao diện bài thi.</p></div>";
+  }
+});
+</script>
+</body>
+</html>
